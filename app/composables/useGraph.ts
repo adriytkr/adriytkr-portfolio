@@ -1,250 +1,454 @@
 import * as d3 from 'd3';
 
-export default function(props:GraphProps){
+export default function(){
   const containerRef=ref<SVGSVGElement|null>(null);
-  const components=reactive<GraphComponents>({});
   const svgSelection=ref<d3.Selection<SVGSVGElement,unknown,null,undefined>|null>(null);
+  const components=reactive<GraphComponents>({});
 
-  const width=ref(0);
-  const height=ref(0);
+  const theWidth=ref(0);
+  const theHeight=ref(0);
+  let currentXScale:d3.ScaleLinear<number,number>;
+  let currentYScale:d3.ScaleLinear<number,number>;
 
-  const xScale=computed<TheScale>(()=>
-    d3
-      .scaleLinear()
-      .domain(props.domain)
-      .range([0,width.value])
-  );
-  const yScale=computed<TheScale>(()=>
-    d3
-      .scaleLinear()
-      .domain(props.range)
-      .range([height.value,0])
-  );
-
-  const currentXScale=ref<TheScale>(xScale.value);
-  const currentYScale=ref<TheScale>(yScale.value);
+  const objects=ref<MathObject[]>([]);
 
   function init(){
     initSVG();
     initGroups();
-    initZoom();
+    initScales();
+    initArrowMarker();
+  }
 
-    currentXScale.value=xScale.value;
-    currentYScale.value=yScale.value;
+  function initScales(){
+    currentXScale=d3
+      .scaleLinear()
+      .domain([-3,3])
+      .range([0,theWidth.value]);
 
-    draw(xScale.value,yScale.value);
+    currentYScale=d3
+      .scaleLinear()
+      .domain([-3,3])
+      .range([theHeight.value,0]);
   }
 
   function initSVG(){
     if(!containerRef.value)return;
 
-    width.value=containerRef.value?.clientWidth;
-    height.value=containerRef.value?.clientHeight;
+    theWidth.value=containerRef.value?.clientWidth;
+    theHeight.value=containerRef.value?.clientHeight;
     svgSelection.value=d3
       .select(containerRef.value)
-      .attr('viewBox',`0 0 ${width.value} ${height.value}`);
+      .attr('viewBox',`0 0 ${theWidth.value} ${theHeight.value}`);
   }
 
   function initGroups(){
     components.root=svgSelection.value!.append('g');
-
-    components.grid=components.root.append('g').attr('class','grid');
-    components.axes=components.root.append('g').attr('class','axes');
-    components.xAxis=components.axes.append('g').attr('class','x-axis');
-    components.yAxis=components.axes.append('g').attr('class','y-axis');
-
-    components.functions=components.root.append('g').attr('class','lines');
     components.points=components.root.append('g').attr('class','points');
+    components.vectors=components.root.append('g').attr('class','vectors');
+    components.functions=components.root.append('g').attr('class','functions');
+    components.shapes=components.root.append('g').attr('class','shapes');
+    components.grids=components.root.append('g').attr('class','grids');
   }
 
-  function initZoom(){
-    const zoom=d3.zoom<SVGSVGElement,unknown>()
-      .on('zoom',e=>{
-        const t=e.transform;
-        currentXScale.value=t.rescaleX(xScale.value);
-        currentYScale.value=t.rescaleY(yScale.value);
+  function initArrowMarker(){
+    if(!svgSelection.value)return;
 
-        draw(currentXScale.value,currentYScale.value);
-      });
+    const defs=svgSelection.value.append('defs');
 
-    if(props.draggable)svgSelection.value!.call(zoom);
+    defs.append('marker')
+      .attr('id','arrow')
+      .attr('viewBox','0 0 10 10')
+      .attr('refX',10)
+      .attr('refY',5)
+      .attr('markerWidth',6)
+      .attr('markerHeight',6)
+      .attr('orient','auto')
+      .append('path')
+      .attr('d','M 0 0 L 10 5 L 0 10 z')
+      .attr('fill','rgb(var(--text-color))');
   }
 
-  function draw(xS:TheScale,yS:TheScale){
-    drawGrid(xS,yS);
-    drawAxes(xS,yS);
-    drawFunctions(xS,yS);
-    drawPoints(xS,yS);
-  }
+  function add(object:MathObject){
+    objects.value.push(object);
 
-  function drawGrid(xS:TheScale,yS:TheScale){
-    if(!components.grid)return;
+    if(object instanceof PointObject&&components.points){
+      return components.points
+        .append('circle')
+        .attr('data-id',object.id)
+        .attr('r',object.size)
+        .attr('fill','black')
+        .attr('cx',currentXScale(object.at.x))
+        .attr('cy',currentYScale(object.at.y));
+    }else if(object instanceof VectorObject&&components.vectors){
+      return components.vectors
+        .append('line')
+        .attr('data-id',object.id)
+        .attr('stroke','black')
+        .attr('stroke-width',3)
+        .attr('marker-end','url(#arrow)')
+        .attr('x1',currentXScale(object.from.x))
+        .attr('y1',currentYScale(object.from.y))
+        .attr('x2',currentXScale(object.to.x))
+        .attr('y2',currentYScale(object.to.y));
+    }else if(object instanceof FunctionObject&&components.functions){
+      const path=d3
+        .line<Point>()
+        .x(p=>currentXScale(p.x))
+        .y(p=>currentYScale(p.y));
+      return components.functions
+        .append('path')
+        .attr('data-id',object.id)
+        .attr('fill','none')
+        .attr('stroke','black')
+        .attr('stroke-width',2)
+        .attr('d',path(object.points));
+    }else if(object instanceof LineObject&&components.shapes){
+      return components.shapes
+        .append('line')
+        .attr('data-id',object.id)
+        .attr('stroke','black')
+        .attr('stroke-width',3)
+        .attr('x1',currentXScale(object.from.x))
+        .attr('y1',currentYScale(object.from.y))
+        .attr('x2',currentXScale(object.to.x))
+        .attr('y2',currentYScale(object.to.y))
+    }else if(object instanceof GridObject&&components.grids){
+      const grid=components.grids
+        .append('g')
+        .attr('data-id',object.id);
 
-    // Draw vertical grid
-    components.grid
-      .selectAll('line.v-grid')
-      .data(xS.ticks())
-      .join('line')
-      .attr('class','v-grid')
-      .attr('x1',p=>xS(p))
-      .attr('x2',p=>xS(p))
-      .attr('y1',p=>0)
-      .attr('y2',p=>height.value)
-      .attr('stroke','rgb(var(--divider-color))')
-      .attr('stroke-width',1)
-      .attr('opacity',0.5);
+      // vertical lines
+      const vlinesCount=Math.ceil(6/object.xGap);
+      for(let i=0;i<=vlinesCount;i++){
+        const step=-3+i*object.xGap;
+        grid
+          .append('line')
+          .attr('data-id',`${object.id}-v${i}`)
+          .attr('x1',currentXScale(step))
+          .attr('y1',currentYScale(-theHeight.value/2))
+          .attr('x2',currentXScale(step))
+          .attr('y2',currentYScale(theHeight.value/2))
+          .attr('stroke','black')
+          .attr('stroke-width',1);
+      }
 
-    // Draw horizontal grid
-    components.grid
-      .selectAll('line.h-grid')
-      .data(yS.ticks())
-      .join('line')
-      .attr('class','h-grid')
-      .attr('x1',0)
-      .attr('x2',width.value)
-      .attr('y1',p=>yS(p))
-      .attr('y2',p=>yS(p))
-      .attr('stroke','rgb(var(--divider-color))')
-      .attr('stroke-width',1)
-      .attr('opacity',0.5);
-  }
+      // horizontal lines count
+      const hlinesCount=Math.ceil(6/object.xGap);
+      for(let i=0;i<=hlinesCount;i++){
+        const step=-3+i*object.xGap;
+        grid
+          .append('line')
+          .attr('data-id',`${object.id}-v${i}`)
+          .attr('x1',currentXScale(-theWidth.value/2))
+          .attr('y1',currentYScale(step))
+          .attr('x2',currentXScale(theWidth.value/2))
+          .attr('y2',currentYScale(step))
+          .attr('stroke','black')
+          .attr('stroke-width',1);
+      }
 
-  function drawAxes(xS:TheScale,yS:TheScale){
-    if(!components.xAxis||!components.yAxis)return;
-
-    const [xMin,xMax]=xS.domain() as [number,number];
-    const [yMin,yMax]=yS.domain() as [number,number];
-    const isZeroInDomain=isNumberInInterval(0,[xMin,xMax]);
-    const isZeroInRange=isNumberInInterval(0,[yMin,yMax]);
-
-    // Define axis
-    const xAxis=d3
-      .axisBottom(xS)
-      .tickSize(0)
-      .tickPadding(5)
-      .tickFormat((d)=>{
-        const n=+d;
-        if(!isZeroInRange&&n===0) return '';
-        return Number.isInteger(n)
-          ?n.toFixed(0)
-          :n.toString();
-      });
-
-    const yAxis=d3
-      .axisLeft(yS)
-      .tickSize(0)
-      .tickPadding(5)
-      .tickFormat((d)=>{
-        const n=+d;
-        if(n===0)return '';
-        return Number.isInteger(n)
-          ?n.toFixed(0)
-          :n.toString();
-      });
-
-    // Calculate axes position
-    const xAxisPosition=isZeroInRange
-      ?yS(0)
-      :(yMax>0?height.value-20:0);
-
-    const yAxisPosition=isZeroInDomain
-      ?xS(0)
-      :(xMax>0?20:width.value);
-
-    components.xAxis
-      .attr('transform',`translate(0,${xAxisPosition})`)
-      .call(xAxis);
-
-    components.yAxis
-      .attr('transform',`translate(${yAxisPosition},0)`)
-      .call(yAxis);
-
-    // Style domain lines
-    components.xAxis
-      .select('.domain')
-      .attr('x1',0)
-      .attr('x2',width.value)
-      .attr('stroke','rgb(var(--text-color))');
-
-    components.yAxis
-      .select('.domain')
-      .attr('y1',0)
-      .attr('y2',height.value)
-      .attr('stroke','rgb(var(--text-color))');
-
-    // Move 0 tick out of y-axis
-    components.xAxis
-      .selectAll<SVGTextElement,d3.NumberValue>('.tick text')
-      .filter(d=>+d===0)
-      .attr('dx',-7);
-
-    // Relocate axis if necessary
-    if(!isZeroInRange){
-      components.xAxis
-        .selectAll('.tick text')
-        .attr('opacity',0.7);
-        components.xAxis
-        .select('.domain')
-        .remove();
+      return grid;
     }
-
-    if(!isZeroInDomain){
-      components.yAxis
-        .selectAll('.tick text')
-        .attr('opacity',0.7);
-        components.yAxis
-        .select('.domain')
-        .remove();
-    }
-  } 
-
-  function drawFunctions(xS:TheScale,yS:TheScale){
-    const line=d3
-      .line<Point>()
-      .x(p=>xS(p.x))
-      .y(p=>yS(p.y));
-
-    const paths=components.functions!
-      .selectAll<SVGPathElement,MathFunction>('path')
-      .data(props.functions!);
-
-    paths.join('path')
-      .attr('fill','none')
-      .attr('stroke','rgb(var(--text-color))')
-      .attr('stroke-width',2)
-      .attr('d',func=>line(generatePoints(func)));
   }
 
-  function drawPoints(xS:TheScale,yS:TheScale){
-    const groups=components.points!
-      .selectAll<SVGGElement,Point[]>('g.point-group')
-      .data(props.points!);
-
-    const groupsEnter=groups.join('g').attr('class','point-group');
-
-    groupsEnter.each(function(pointData){
-      d3.select(this)
-        .selectAll<SVGCircleElement,Point>('circle.point')
-        .data(pointData)
-        .join('circle')
-        .attr('class','point')
-        .attr('cx',p=>xS(p.x))
-        .attr('cy',p=>yS(p.y))
-        .attr('r',5)
-        .attr('fill','rgb(var(--text-color))');
-    });
+  function remove(object:MathObject){
+    objects.value=objects.value.filter(o=>o.id!==object.id);
   }
 
-  watch(
-    ()=>[props.functions,props.points],
-    ()=>{
-      drawPoints(currentXScale.value,currentYScale.value);
-      drawFunctions(currentXScale.value,currentYScale.value)
-    },
-    {deep:true},
-  );
+  function clear(){
+    objects.value=[];
+  }
+
+  async function play(...animations:LazyAnimation[]):Promise<void>{
+    const promises=animations.map(a=>a());
+    await Promise.all(promises);
+  }
+
+  function fadeIn(
+    object:MathObject,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.points||!components.vectors)return;
+      const selection=add(object);
+      if(!selection)return;
+      return new Promise<void>(resolve=>{
+        selection
+          .style('opacity',0)
+          .transition()
+          .duration(options.duration)
+          .style('opacity',1)
+          .on('end',()=>resolve());
+      });
+    };
+  }
+
+  function growVector(
+    vector:Growable&MathObject,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.vectors)return;
+      const selection=add(vector) as d3.Selection<SVGLineElement, unknown, null, undefined>|undefined;
+      if(!selection)return;
+      return new Promise<void>(resolve=>{
+        selection
+          .attr('x2',currentXScale(vector.from.x))
+          .attr('y2',currentYScale(vector.from.y))
+          .transition()
+          .duration(options.duration)
+          .attr('x2',currentXScale(vector.to.x))
+          .attr('y2',currentYScale(vector.to.y))
+          .on('end',()=>resolve());
+      });
+    };
+  }
+
+  const fetchElement=(object:MathObject)=>
+      d3.select(`[data-id="${object.id}"]`);
+
+  const removeObject=(object:MathObject)=>{
+    objects.value=objects.value.filter(o=>o.id!==object.id);
+  };
+
+  function fadeOut(
+    object:MathObject,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.vectors||!components.points)return;
+      const selection=fetchElement(object);
+      if(!selection)return;
+      return new Promise<void>(resolve=>{
+        selection
+          .transition()
+          .duration(options.duration)
+          .style('opacity',0)
+          .on('end',()=>{
+            removeObject(object);
+            selection.remove();
+            resolve();
+          });
+      });
+    };
+  }
+
+  function ungrowVector(
+    vector:VectorObject,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.vectors||!components.points)return;
+      const selection=fetchElement(vector);
+      if(!selection)return;
+      return new Promise<void>(resolve=>{
+        selection
+          .transition()
+          .duration(options.duration)
+          .attr('x2',currentXScale(vector.from.x))
+          .attr('y2',currentYScale(vector.from.y))
+          .on('end',()=>{
+            removeObject(vector);
+            selection.remove();
+            resolve();
+          });
+      });
+    };
+  }
+
+  function moveTo(
+    object:MathObject,
+    target:Point,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.vectors||!components.points)return;
+      const selection=fetchElement(object);
+      if(!selection)return;
+      return new Promise<void>(resolve=>{
+        if(object instanceof PointObject){
+          const start={...object.at};
+          const dx=target.x-start.x;
+          const dy=target.y-start.y;
+
+          selection
+            .transition()
+            .duration(options.duration)
+            .tween('move',()=>(alpha:number)=>{
+              object.at.x=start.x+alpha*dx;
+              object.at.y=start.y+alpha*dy;
+              selection
+                .attr('cx',currentXScale(object.at.x))
+                .attr('cy',currentYScale(object.at.y));
+            })
+            .on('end',()=>resolve());
+        }else if(object instanceof VectorObject){
+          const startFrom={...object.from};
+          const startTo={...object.to};
+          const dx=target.x-startFrom.x;
+          const dy=target.y-startFrom.y;
+
+          selection
+            .transition()
+            .duration(options.duration)
+            .tween('move',()=>(alpha:number)=>{
+              object.from.x=startFrom.x+alpha*dx;
+              object.from.y=startFrom.y+alpha*dy;
+              object.to.x=startTo.x+alpha*dx;
+              object.to.y=startTo.y+alpha*dy;
+
+              selection
+                .attr('x1',currentXScale(object.from.x))
+                .attr('y1',currentYScale(object.from.y))
+                .attr('x2',currentXScale(object.to.x))
+                .attr('y2',currentYScale(object.to.y));
+            })
+            .on('end',()=>resolve());
+        }
+      });
+    };
+  }
+
+  function shift(
+    object:MathObject,
+    delta:Point,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.vectors||!components.points)return;
+      const selection=fetchElement(object);
+      if(!selection)return;
+      return new Promise<void>(resolve=>{
+        if(object instanceof PointObject){
+          moveTo(object,delta,options);
+        }else if(object instanceof VectorObject){
+          const startFrom={...object.from};
+          const startTo={...object.to};
+
+          selection
+            .transition()
+            .duration(options.duration)
+            .tween('move',()=>(alpha:number)=>{
+              object.from.x=startFrom.x+alpha*delta.x;
+              object.from.y=startFrom.y+alpha*delta.y;
+              object.to.x=startTo.x+alpha*delta.x;
+              object.to.y=startTo.y+alpha*delta.y;
+
+              selection
+                .attr('x1',currentXScale(object.from.x))
+                .attr('y1',currentYScale(object.from.y))
+                .attr('x2',currentXScale(object.to.x))
+                .attr('y2',currentYScale(object.to.y));
+            })
+            .on('end',()=>resolve());
+        }
+      });
+    };
+  }
+
+  function applyMatrixToPoint(p: Point, theMatrix: Matrix2x2): Point {
+    const [[a,b],[c,d]] = theMatrix;
+    return {
+      x: a*p.x + b*p.y,
+      y: c*p.x + d*p.y
+    };
+  }
+
+  function applyMatrix(
+    object:MathObject,
+    theMatrix:Matrix2x2,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS
+  ):LazyAnimation{
+    return async()=>{
+      if(!components.points||!components.vectors)return;
+      const selection=fetchElement(object);
+      if(!selection)return;
+
+      return new Promise<void>(resolve=>{
+        const [a,b]=theMatrix[0];
+        const [c,d]=theMatrix[1];
+
+        if(object instanceof PointObject){
+          const start:Point={...object.at};
+          selection
+            .transition()
+            .duration(options.duration)
+            .tween('matrix',()=>(alpha:number)=>{
+              object.at.x=start.x*(1-alpha)+alpha*(a*start.x+b*start.y);
+              object.at.y=start.y*(1-alpha)+alpha*(c*start.x+d*start.y);
+
+              selection
+                .attr('cx',currentXScale(object.at.x))
+                .attr('cy',currentYScale(object.at.y));
+            })
+            .on('end',()=>resolve());
+        }else if(object instanceof VectorObject){
+            const startTo:Point={...object.to};
+            selection
+              .transition()
+              .duration(options.duration)
+              .tween('matrix2',()=>(alpha:number)=>{
+                object.to.x=startTo.x*(1-alpha)+alpha*(a*startTo.x+b*startTo.y);
+                object.to.y=startTo.y*(1-alpha)+alpha*(c*startTo.x+d*startTo.y);
+
+                selection
+                  .attr('x2', currentXScale(object.to.x))
+                  .attr('y2', currentYScale(object.to.y));
+              })
+              .on('end',()=>resolve());
+        }else if(object instanceof GridObject){
+          const selection=fetchElement(object);
+          if(!selection)return;
+          const lines=selection.selectAll<SVGLineElement,unknown>('line');
+
+          return new Promise<void>((resolve)=>{
+            lines
+              .transition()
+              .duration(options.duration)
+              .tween('damn',function() {
+                const line=d3.select(this);
+                const x1=+line.attr('x1');
+                const y1=+line.attr('y1');
+                const x2=+line.attr('x2');
+                const y2=+line.attr('y2');
+
+                return (alpha: number) => {
+                  const p1 = applyMatrixToPoint({x: x1, y: y1}, theMatrix);
+                  const p2 = applyMatrixToPoint({x: x2, y: y2}, theMatrix);
+
+                  const nx1=x1*(1-alpha)+p1.x*alpha;
+                  const ny1=y1*(1-alpha)+p1.y*alpha;
+                  const nx2=x2*(1-alpha)+p2.x*alpha;
+                  const ny2=y2*(1-alpha)+p2.y*alpha;
+
+                  line
+                    .attr('x1',nx1)
+                    .attr('y1',ny1)
+                    .attr('x2',nx2)
+                    .attr('y2',ny2);
+                };
+              })
+              .on('end', () => resolve());
+          });
+        }
+      });
+    };
+  }
 
   onMounted(init);
 
-  return{containerRef};
+  return{
+    containerRef,
+    add,
+    remove,
+    clear,
+    play,
+    fadeIn,
+    growVector,
+    fadeOut,
+    ungrowVector,
+    moveTo,
+    shift,
+    applyMatrix,
+  };
 }

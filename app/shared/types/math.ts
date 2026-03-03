@@ -4,3 +4,8 @@ export type Point={
 };
 
 export type Interval=[number,number];
+
+export type Matrix2x2=[
+  [number,number],
+  [number,number],
+];

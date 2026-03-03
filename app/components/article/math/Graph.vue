@@ -1,17 +1,34 @@
 <script setup lang="ts">
-// BUG WTF!!!!!????
-type GraphProps={
-  points?:Point[][];
-  functions?:MathFunction[];
-  domain:Interval;
-  range:Interval;
-  draggable?:boolean;
+const {
+  containerRef,
+  add,
+  remove,
+  clear,
+  play,
+  fadeIn,
+  growVector,
+  fadeOut,
+  ungrowVector,
+  moveTo,
+  shift,
+  applyMatrix,
+}=useGraph();
+const api:GraphAPI={
+  add,
+  remove,
+  clear,
+  play,
+  animate:{
+    fadeIn,
+    growVector,
+    fadeOut,
+    ungrowVector,
+    moveTo,
+    shift,
+    applyMatrix,
+  },
 };
-//
-
-const props=defineProps<GraphProps>();
-
-const {containerRef}=useGraph(props);
+defineExpose(api);
 </script>
 
 <template>
@@ -23,6 +40,7 @@ const {containerRef}=useGraph(props);
   width:100%;
   max-width:750px;
   height:400px;
+  border:1px solid black;
   display:block;
 }
 </style>
