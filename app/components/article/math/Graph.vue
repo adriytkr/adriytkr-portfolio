@@ -13,6 +13,7 @@ const {
   shift,
   applyMatrix,
   addAxes,
+  parameterChange,
 }=useGraph();
 const api:GraphAPI={
   add,
@@ -27,6 +28,7 @@ const api:GraphAPI={
     moveTo,
     shift,
     applyMatrix,
+    parameterChange,
   },
   addAxes,
 };

@@ -31,7 +31,7 @@ export default function(){
         currentYScale=transform.rescaleY(baseYScale);
 
         addAxes();
-        updateScene();
+        requestUpdate();
       });
 
     svgSelection.value?.call(zoom);
@@ -191,6 +191,20 @@ export default function(){
 
   function add(object:MathObject){
     objects.value.push(object);
+    if(isReactive(object)){
+      console.log(`${object} is reactive`);
+
+      if(object instanceof FunctionObject){
+        watch(()=>[object.f,object.domain],()=>{
+          object.updatePoints();
+          requestUpdate();
+        });
+      }else{
+        watch(object,()=>{
+          requestUpdate();
+        }, { deep: true });
+      }
+    }
 
     if(object instanceof PointObject&&components.points){
       return components.points
@@ -490,6 +504,49 @@ export default function(){
     };
   }
 
+  let redrawQueued=false;
+  function requestUpdate() {
+    if (redrawQueued) return;
+    redrawQueued = true;
+    requestAnimationFrame(() => {
+      updateScene();
+      redrawQueued = false;
+    });
+  }
+
+function parameterChange(
+  name:string,
+  startValue: number,
+  endValue: number,
+  theFunc: (t: number) => void,
+  options = DEFAULT_ANIMATION_OPTIONS
+): LazyAnimation {
+  return async () => {
+    // Create an interpolator for the 't' value
+    const interpolator = d3.interpolate(startValue, endValue);
+
+    return new Promise<void>((resolve) => {
+      d3.transition(name)
+        .duration(options.duration)
+        .ease(d3.easeCubicInOut)
+        .tween(`parameter-change-${name}`, () => {
+          return (t: number) => {
+            // 1. Calculate the current 't' based on time (0 to 1)
+            const currentT = interpolator(t);
+            
+            // 2. Execute your custom logic
+            theFunc(currentT);
+
+            // 3. Sync the SVG to the modified objects
+            // updateScene();
+            requestUpdate();
+          };
+        })
+        .on("end", () => resolve());
+    });
+  };
+}
+
   onMounted(init);
 
   return{
@@ -506,5 +563,6 @@ export default function(){
     shift,
     applyMatrix,
     addAxes,
+    parameterChange,
   };
 }

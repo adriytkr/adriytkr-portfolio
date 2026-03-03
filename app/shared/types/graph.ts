@@ -50,6 +50,7 @@ export class FunctionObject extends MathObject{
   public points:Point[]=[];
   public f:MathFunction;
   public domain:Interval;
+  public samples:number;
 
   constructor(
     id:number,
@@ -60,17 +61,19 @@ export class FunctionObject extends MathObject{
     super(id);
     this.f=f;
     this.domain=domain;
-    this.generatePoints(samples);
+    this.samples=samples;
+    this.updatePoints();
   }
-  public generatePoints(samples:number){
-    const [x0,x1]=this.domain;
-    this.points=[];
-    for (let i=0;i<=samples;i++){
-      const step=((x1-x0)*i)/samples;
-      const x=x0+step;
-      this.points.push({x,y:this.f(x)});
+  public updatePoints(){
+      const [min, max] = this.domain;
+      const step = (max - min) / this.samples;
+      const newPoints = [];
+      for (let i = 0; i <= this.samples; i++) {
+        const x = min + i * step;
+        newPoints.push({ x, y: this.f(x) });
+      }
+      this.points=newPoints;
     }
-  }
 }
 
 export type MathFunction=(x:number)=>number;
@@ -107,6 +110,7 @@ export interface GraphAPI{
     moveTo:(object:MathObject,target:Point,options?:AnimationOptions)=>LazyAnimation;
     shift:(object:MathObject,delta:Point,options?:AnimationOptions)=>LazyAnimation;
     applyMatrix:(object:MathObject,matrix:Matrix2x2,options?:AnimationOptions)=>LazyAnimation;
+    parameterChange:(name:string,startValue:number,endValue:number,theFunc:(t:number)=>void,options?:AnimationOptions)=>LazyAnimation;
   },
   addAxes:()=>void;
 };
