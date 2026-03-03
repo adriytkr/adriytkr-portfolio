@@ -53,6 +53,24 @@ export default function(){
           .attr('y1',v=>currentYScale(v.from.y))
           .attr('x2',v=>currentXScale(v.to.x))
           .attr('y2',v=>currentYScale(v.to.y));
+
+      if(components.shapes)
+        components.shapes
+          .selectAll<SVGLineElement,VectorObject>('line')
+          .attr('x1',v=>currentXScale(v.from.x))
+          .attr('y1',v=>currentYScale(v.from.y))
+          .attr('x2',v=>currentXScale(v.to.x))
+          .attr('y2',v=>currentYScale(v.to.y));
+
+      if(components.functions){
+        const lineGenerator = d3.line<Point>()
+          .x(p => currentXScale(p.x))
+          .y(p => currentYScale(p.y));
+
+        components.functions
+          .selectAll<SVGPathElement, FunctionObject>('path')
+          .attr('d', d => lineGenerator(d.points)); 
+      }
   }
 
   function initScales(){
@@ -392,7 +410,7 @@ export default function(){
       return new Promise<void>(resolve=>{
         if(object instanceof PointObject){
           moveTo(object,delta,options);
-        }else if(object instanceof VectorObject){
+        }else if(object instanceof VectorObject||object instanceof LineObject){
           const startFrom={...object.from};
           const startTo={...object.to};
 
