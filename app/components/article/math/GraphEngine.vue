@@ -4,36 +4,13 @@ const {
   add,
   remove,
   clear,
-  play,
-  fadeIn,
-  growVector,
-  fadeOut,
-  ungrowVector,
-  moveTo,
-  shift,
-  applyMatrix,
-  addAxes,
-  parameterChange,
-  requestUpdate,
 }=useGraphEngine();
 
 const api:GraphAPI={
   add,
   remove,
   clear,
-  play,
-  requestUpdate,
-  animate:{
-    fadeIn,
-    growVector,
-    fadeOut,
-    ungrowVector,
-    moveTo,
-    shift,
-    applyMatrix,
-    parameterChange,
-  },
-  addAxes,
+  animate:{},
 };
 defineExpose(api);
 </script>

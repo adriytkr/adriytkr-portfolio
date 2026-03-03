@@ -4,7 +4,4 @@ export type GraphComponents={
   points?:d3Selection;
   vectors?:d3Selection;
   functions?:d3Selection;
-  shapes?:d3Selection;
-  grids?:d3Selection;
-  axes?:d3Selection;
 };
