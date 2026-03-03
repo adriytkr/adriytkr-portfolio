@@ -25,20 +25,9 @@ export class VectorObject extends MathObject implements Growable{
   }
 };
 
-export class AxisObject extends MathObject{}
-
-export class GridObject extends MathObject{
-  public xGap:number;
-  public yGap:number;
-
-  constructor(
-    id:number,
-    xGap:number,
-    yGap:number,
-  ){
-    super(id)
-    this.xGap=xGap;
-    this.yGap=yGap;
+export class AxesObject extends MathObject{
+  constructor(id:number){
+    super(id);
   }
 }
 
@@ -94,6 +83,7 @@ export type GraphComponents={
   functions?:d3Selection;
   shapes?:d3Selection;
   grids?:d3Selection;
+  axes?:d3Selection;
 };
 
 export interface AnimationOptions{
@@ -118,4 +108,5 @@ export interface GraphAPI{
     shift:(object:MathObject,delta:Point,options?:AnimationOptions)=>LazyAnimation;
     applyMatrix:(object:MathObject,matrix:Matrix2x2,options?:AnimationOptions)=>LazyAnimation;
   },
+  addAxes:()=>void;
 };

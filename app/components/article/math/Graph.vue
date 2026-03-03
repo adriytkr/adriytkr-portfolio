@@ -12,6 +12,7 @@ const {
   moveTo,
   shift,
   applyMatrix,
+  addAxes,
 }=useGraph();
 const api:GraphAPI={
   add,
@@ -27,6 +28,7 @@ const api:GraphAPI={
     shift,
     applyMatrix,
   },
+  addAxes,
 };
 defineExpose(api);
 </script>

@@ -7,6 +7,8 @@ export default function(){
 
   const theWidth=ref(0);
   const theHeight=ref(0);
+  let baseXScale:d3.ScaleLinear<number,number>;
+  let baseYScale:d3.ScaleLinear<number,number>;
   let currentXScale:d3.ScaleLinear<number,number>;
   let currentYScale:d3.ScaleLinear<number,number>;
 
@@ -17,18 +19,54 @@ export default function(){
     initGroups();
     initScales();
     initArrowMarker();
+    initZoom();
+  }
+
+  function initZoom(){
+    const zoom=d3
+      .zoom<SVGSVGElement,unknown>()
+      .on('zoom',e=>{
+        const transform=e.transform;
+        currentXScale=transform.rescaleX(baseXScale);
+        currentYScale=transform.rescaleY(baseYScale);
+
+        addAxes();
+        updateScene();
+      });
+
+    svgSelection.value?.call(zoom);
+  }
+
+  function updateScene(){
+    // Update Points
+      if(components.points)
+        components.points
+          .selectAll<SVGCircleElement,PointObject>('circle')
+          .attr('cx',p=>currentXScale(p.at.x))
+          .attr('cy',p=>currentYScale(p.at.y));
+
+      // Update Vectors
+      if(components.vectors)
+        components.vectors
+          .selectAll<SVGLineElement,VectorObject>('line')
+          .attr('x1',v=>currentXScale(v.from.x))
+          .attr('y1',v=>currentYScale(v.from.y))
+          .attr('x2',v=>currentXScale(v.to.x))
+          .attr('y2',v=>currentYScale(v.to.y));
   }
 
   function initScales(){
-    currentXScale=d3
+    baseXScale=d3
       .scaleLinear()
-      .domain([-3,3])
+      .domain([3,10])
       .range([0,theWidth.value]);
+    currentXScale=baseXScale;
 
-    currentYScale=d3
+    baseYScale=d3
       .scaleLinear()
-      .domain([-3,3])
+      .domain([3,10])
       .range([theHeight.value,0]);
+    currentYScale=baseYScale;
   }
 
   function initSVG(){
@@ -48,7 +86,72 @@ export default function(){
     components.functions=components.root.append('g').attr('class','functions');
     components.shapes=components.root.append('g').attr('class','shapes');
     components.grids=components.root.append('g').attr('class','grids');
+    components.axes=components.root.append('g').attr('class','axes');
   }
+
+  function addAxes(){
+    if(!components.axes)return;
+    components.axes
+      .selectAll('*')
+      .remove();
+
+    const xAxisGenerator=d3
+      .axisBottom(currentXScale)
+      .tickSize(0)
+      .tickPadding(6)
+      .ticks(10)
+      .tickFormat(d=>{
+        const n=+d;
+        return Number.isInteger(n)?n.toFixed(0):n.toString();
+      });
+    const yAxisGenerator=d3
+      .axisLeft(currentYScale)
+      .tickSize(0)
+      .ticks(10)
+      .tickFormat(d=>{
+        const n=+d;
+        if(n===0)return'';
+        return Number.isInteger(n)?n.toFixed(0):n.toString();
+      });
+
+    const domain=currentXScale.domain() as Interval;
+    const range=currentYScale.domain() as Interval;
+    const xAxisPosition=
+      isNumberInInterval(0,range)
+        ?currentYScale(0)
+        :range[1]<0?0:theHeight.value-20;
+    const yAxisPosition=
+      isNumberInInterval(0,domain)
+        ?currentXScale(0)
+        :domain[1]<0?theWidth.value:20;
+
+    const xAxisGroup=components.axes
+      .append('g')
+      .attr('class','x-axis')
+      .attr('transform',`translate(0,${xAxisPosition})`)
+      .call(xAxisGenerator);
+    const yAxisGroup=components.axes
+      .append('g')
+      .attr('class','y-axis')
+      .attr('transform',`translate(${yAxisPosition},0)`)
+      .call(yAxisGenerator);
+
+    // move 0 out of the y-axis
+    const r=xAxisGroup
+      .selectAll('text')
+      .filter(d=>d===0)
+      .attr('dx','-8px');
+
+    // hide axis line
+    if(!isNumberInInterval(0,range))
+      xAxisGroup
+        .select('.domain')
+        .style('opacity',0);
+    if(!isNumberInInterval(0,domain))
+      yAxisGroup
+        .select('.domain')
+        .style('opacity',0);
+  } 
 
   function initArrowMarker(){
     if(!svgSelection.value)return;
@@ -74,6 +177,7 @@ export default function(){
     if(object instanceof PointObject&&components.points){
       return components.points
         .append('circle')
+        .datum(object)
         .attr('data-id',object.id)
         .attr('r',object.size)
         .attr('fill','black')
@@ -82,6 +186,7 @@ export default function(){
     }else if(object instanceof VectorObject&&components.vectors){
       return components.vectors
         .append('line')
+        .datum(object)
         .attr('data-id',object.id)
         .attr('stroke','black')
         .attr('stroke-width',3)
@@ -98,6 +203,7 @@ export default function(){
       return components.functions
         .append('path')
         .attr('data-id',object.id)
+        .datum(object)
         .attr('fill','none')
         .attr('stroke','black')
         .attr('stroke-width',2)
@@ -105,6 +211,7 @@ export default function(){
     }else if(object instanceof LineObject&&components.shapes){
       return components.shapes
         .append('line')
+        .datum(object)
         .attr('data-id',object.id)
         .attr('stroke','black')
         .attr('stroke-width',3)
@@ -112,42 +219,6 @@ export default function(){
         .attr('y1',currentYScale(object.from.y))
         .attr('x2',currentXScale(object.to.x))
         .attr('y2',currentYScale(object.to.y))
-    }else if(object instanceof GridObject&&components.grids){
-      const grid=components.grids
-        .append('g')
-        .attr('data-id',object.id);
-
-      // vertical lines
-      const vlinesCount=Math.ceil(6/object.xGap);
-      for(let i=0;i<=vlinesCount;i++){
-        const step=-3+i*object.xGap;
-        grid
-          .append('line')
-          .attr('data-id',`${object.id}-v${i}`)
-          .attr('x1',currentXScale(step))
-          .attr('y1',currentYScale(-theHeight.value/2))
-          .attr('x2',currentXScale(step))
-          .attr('y2',currentYScale(theHeight.value/2))
-          .attr('stroke','black')
-          .attr('stroke-width',1);
-      }
-
-      // horizontal lines count
-      const hlinesCount=Math.ceil(6/object.xGap);
-      for(let i=0;i<=hlinesCount;i++){
-        const step=-3+i*object.xGap;
-        grid
-          .append('line')
-          .attr('data-id',`${object.id}-v${i}`)
-          .attr('x1',currentXScale(-theWidth.value/2))
-          .attr('y1',currentYScale(step))
-          .attr('x2',currentXScale(theWidth.value/2))
-          .attr('y2',currentYScale(step))
-          .attr('stroke','black')
-          .attr('stroke-width',1);
-      }
-
-      return grid;
     }
   }
 
@@ -396,40 +467,6 @@ export default function(){
                   .attr('y2', currentYScale(object.to.y));
               })
               .on('end',()=>resolve());
-        }else if(object instanceof GridObject){
-          const selection=fetchElement(object);
-          if(!selection)return;
-          const lines=selection.selectAll<SVGLineElement,unknown>('line');
-
-          return new Promise<void>((resolve)=>{
-            lines
-              .transition()
-              .duration(options.duration)
-              .tween('damn',function() {
-                const line=d3.select(this);
-                const x1=+line.attr('x1');
-                const y1=+line.attr('y1');
-                const x2=+line.attr('x2');
-                const y2=+line.attr('y2');
-
-                return (alpha: number) => {
-                  const p1 = applyMatrixToPoint({x: x1, y: y1}, theMatrix);
-                  const p2 = applyMatrixToPoint({x: x2, y: y2}, theMatrix);
-
-                  const nx1=x1*(1-alpha)+p1.x*alpha;
-                  const ny1=y1*(1-alpha)+p1.y*alpha;
-                  const nx2=x2*(1-alpha)+p2.x*alpha;
-                  const ny2=y2*(1-alpha)+p2.y*alpha;
-
-                  line
-                    .attr('x1',nx1)
-                    .attr('y1',ny1)
-                    .attr('x2',nx2)
-                    .attr('y2',ny2);
-                };
-              })
-              .on('end', () => resolve());
-          });
         }
       });
     };
@@ -450,5 +487,6 @@ export default function(){
     moveTo,
     shift,
     applyMatrix,
+    addAxes,
   };
 }
