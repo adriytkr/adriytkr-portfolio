@@ -32,9 +32,9 @@ export interface Animations{
   moveCamera:TypeCameraTransitionAnimation<CameraTransition>;
 };
 
-export interface GraphAPI{
-  add:(object:MathObject)=>void;
-  remove:(object:MathObject)=>void;
+export interface IGraphAPI{
+  add:(obj:MathObject)=>void;
+  remove:(obj:MathObject)=>void;
   clear:()=>void;
   play:(...animations:BaseAnimation[])=>Promise<void[]>;
   setActiveCamera:(camera:CameraObject)=>void;

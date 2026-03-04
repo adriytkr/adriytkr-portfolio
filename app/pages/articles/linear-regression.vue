@@ -35,12 +35,17 @@ const linearFunction=new LinearFunctionObject(7,3,1,5,[-3,3]);
 async function begin(){
   if(!graphRef.value)return;
 
+  graphRef.value.startAnimationLoop();
   graphRef.value.add(camera);
   graphRef.value.setActiveCamera(camera);
-  graphRef.value.add(linearFunction);
-  graphRef.value.add(thePoint);
   graphRef.value.add(theVector);
-  graphRef.value.add(theFunction);
+  graphRef.value.add(linearFunction)
+  await graphRef.value.play(
+    graphRef.value.animate.fadeIn(linearFunction),
+  );
+  // graphRef.value.add(thePoint);
+  // graphRef.value.add(theVector);
+  // graphRef.value.add(theFunction);
   // await graphRef.value.play(
   //   graphRef.value.animate.fadeIn(thePoint),
   //   graphRef.value.animate.fadeIn(theVector),
@@ -63,14 +68,15 @@ async function begin(){
 async function remove(){
   if(!graphRef.value)return;
 
-  await graphRef.value.play(
-    graphRef.value.animate.fadeOut(theVector),
-  );
-  graphRef.value.remove(theVector);
-  await graphRef.value.play(
-    graphRef.value.animate.fadeOut(theFunction),
-  );
-  graphRef.value.remove(theFunction);
+  console.log(graphRef.value);
+  // await graphRef.value.play(
+  //   graphRef.value.animate().fadeOut(theVector),
+  // );
+  // graphRef.value.remove(theVector);
+  // await graphRef.value.play(
+  //   graphRef.value.animate.fadeOut(theFunction),
+  // );
+  // graphRef.value.remove(theFunction);
 }
 
 async function clear(){
@@ -82,10 +88,10 @@ async function clear(){
 async function update(){
   if(!graphRef.value)return;
 
-  graphRef.value.setActiveCamera(camera2);
-  // await graphRef.value.play(
-  //   graphRef.value.animate.moveCamera(camera,[-6,6],[-6,6]),
-  // );
+  // graphRef.value.setActiveCamera(camera2);
+  await graphRef.value.play(
+    graphRef.value.animate.moveCamera(camera,[-6,6],[-6,6]),
+  )
 
   // await graphRef.value.play(
   //   graphRef.value.animate.shift(thePoint,{x:1,y:1}),

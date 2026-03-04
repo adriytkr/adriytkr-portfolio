@@ -1,22 +1,9 @@
 <script setup lang="ts">
 const {
   containerRef,
-  add,
-  remove,
-  clear,
-  play,
-  setActiveCamera,
-  animate,
+  api,
 }=useGraphEngine();
 
-const api:GraphAPI={
-  add,
-  remove,
-  clear,
-  play,
-  setActiveCamera,
-  animate,
-};
 defineExpose(api);
 </script>
 
