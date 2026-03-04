@@ -1,17 +1,17 @@
 import { BaseAnimation } from '~/shared/types/math/engine/animations/BaseAnimation';
 import type { MathObject } from '~/shared/types/math/math-objects/bases';
-import type { GetObjectStyle } from '~/shared/types/math/engine/api';
+import type { ObjectStyle } from '~/shared/types/math/engine/api';
 
 export class FadeInAnimation extends BaseAnimation{
   private style:ObjectStyle;
 
   constructor(
     object: MathObject,
-    getStyle:GetObjectStyle,
+    style:ObjectStyle,
     options:AnimationOptions,
   ){
     super(options);
-    this.style=getStyle(object);
+    this.style=style;
   }
 
   override setup(){

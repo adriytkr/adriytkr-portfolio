@@ -5,6 +5,7 @@ import type { BaseAnimation } from '~/shared/types/math/engine/animations/BaseAn
 import { FadeInAnimation } from '~/shared/types/math/engine/animations/FadeInAnimation';
 import { FadeOutAnimation } from '~/shared/types/math/engine/animations/FadeOutAnimation';
 import { ShiftAnimation } from '~/shared/types/math/engine/animations/ShiftAnimation';
+import { CameraObject } from '~/shared/types/math/math-objects/CameraObject';
 
 import * as d3 from 'd3';
 
@@ -15,14 +16,18 @@ export default function(){
 
   const theWidth=ref(0);
   const theHeight=ref(0);
-  let baseXScale:d3.ScaleLinear<number,number>;
-  let baseYScale:d3.ScaleLinear<number,number>;
+  let baseXScale:d3.ScaleLinear<number,number>|undefined;
+  let baseYScale:d3.ScaleLinear<number,number>|undefined;
   let currentXScale:d3.ScaleLinear<number,number>;
   let currentYScale:d3.ScaleLinear<number,number>;
 
   let objects:MathObject[]=[];
-  let animations:BaseAnimation[]=[];
   let objectStyles=new WeakMap<MathObject,ObjectStyle>();
+  let animations:BaseAnimation[]=[];
+  let cameras:CameraObject[]=[];
+  let activeCamera:CameraObject|null=null;
+
+  let needsUpdate=false;
 
   function play(...anims:BaseAnimation[]){
     return Promise.all(
@@ -38,51 +43,103 @@ export default function(){
   }
 
   function tick(now:number){
-    if(animations.length===0){
-      requestAnimationFrame(tick);
-      return;
+    if(animations.length>0){
+      animations.forEach((anim,index)=>{
+        const elapsed=now-anim.startTime;
+        const alpha=Math.min(elapsed/anim.duration,1);
+
+        anim.update(alpha);
+
+        if(alpha===1){
+          anim.resolve();
+          animations.splice(index,1);
+        }
+        needsUpdate=true;
+      });
     }
 
-    animations.forEach((anim,index)=>{
-      const elapsed=now-anim.startTime;
-      const alpha=Math.min(elapsed/anim.duration,1);
-
-      anim.update(alpha);
-
-      if(alpha===1){
-        anim.resolve();
-        animations.splice(index,1);
-      }
-    });
-
-    updateScene();
+    if(needsUpdate){
+      updateScalesFromCamera();
+      updateScene();
+      needsUpdate=false;
+    }
     requestAnimationFrame(tick);
   }
 
   function init(){
     initSVG();
     initGroups();
-    initScales();
+    updateScalesFromCamera();
     initArrowMarker();
     startAnimationLoop();
+  }
+
+  function initZoom(){
+    if(!svgSelection||!activeCamera)return;
+
+    const zoomBehavior=d3
+      .zoom<SVGSVGElement,unknown>()
+      .scaleExtent([0.5,10])
+      .on('zoom',(event)=>{
+        const {transform}=event;
+
+        const newXScale=transform.rescaleX(baseXScale);
+        const newYScale=transform.rescaleY(baseYScale);
+
+        if(activeCamera){
+          activeCamera.domain=newXScale.domain();
+          activeCamera.range=newYScale.domain();
+        }
+
+        needsUpdate=true;
+      });
+
+    svgSelection.call(zoomBehavior);
   }
 
   function startAnimationLoop(){
     requestAnimationFrame(tick);
   }
 
-  function initScales(){
-    baseXScale=d3
-      .scaleLinear()
-      .domain([-3,3])
-      .range([0,theWidth.value]);
-    currentXScale=baseXScale;
+  function updateScalesFromCamera(){
+    if(!activeCamera)return;
 
-    baseYScale=d3
-      .scaleLinear()
-      .domain([-3,3])
+    if(!baseXScale||!baseYScale){
+      baseXScale=d3
+        .scaleLinear()
+        .domain(activeCamera.domain)
+        .range([0,theWidth.value]);
+      baseYScale=d3
+        .scaleLinear()
+        .domain(activeCamera.range)
+        .range([theHeight.value,0]);
+    }
+
+    currentXScale=d3.
+      scaleLinear()
+      .domain(activeCamera.domain)
+      .range([0,theWidth.value]);
+    currentYScale=d3.
+      scaleLinear()
+      .domain(activeCamera.range)
       .range([theHeight.value,0]);
-    currentYScale=baseYScale;
+  }
+
+  function setActiveCamera(camera:CameraObject){
+    activeCamera=camera;
+
+    baseXScale=undefined;
+    baseYScale=undefined;
+    updateScalesFromCamera();
+
+    if(svgSelection)
+      svgSelection.call(
+        d3.zoom<SVGSVGElement,unknown>().transform,
+        d3.zoomIdentity
+      );
+
+    initZoom();
+    updateScene();
   }
 
   function initSVG(){
@@ -242,9 +299,14 @@ export default function(){
   };
 
   function add(object:MathObject){
-    objects.push(object);
-    objectStyles.set(object,{opacity:1});
-    mountAll();
+    if(object instanceof CameraObject){
+      cameras.push(object);
+      if(!activeCamera)setActiveCamera(object);
+    }else{
+      objects.push(object);
+      objectStyles.set(object,{opacity:1});
+      mountAll();
+    }
   }
 
   function remove(object:MathObject){
@@ -274,12 +336,22 @@ export default function(){
   }
 
   const animate:Animations={
-    fadeIn:(object:MathObject,options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS)=>
-      new FadeInAnimation(object,getObjectStyle,options),
-    fadeOut:(object:MathObject,options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS)=>
-      new FadeOutAnimation(object,getObjectStyle,options),
+    fadeIn(object:MathObject,options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS){
+      const style=getObjectStyle(object);
+      return new FadeInAnimation(object,style,options);
+    },
+    fadeOut(object:MathObject,options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS){
+      const style=getObjectStyle(object);
+      return new FadeOutAnimation(object,style,options);
+    },
     shift:(object:Shiftable,delta:Point,options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS)=>
       new ShiftAnimation(object,delta,options),
+    moveCamera:(
+      camera:CameraObject,
+      targetDomain:Interval,
+      targetRange:Interval,
+      options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS
+    )=>new CameraTransition(camera,targetDomain,targetRange,options),
   };
 
   onMounted(init);
@@ -290,6 +362,7 @@ export default function(){
     remove,
     clear,
     play,
+    setActiveCamera,
     animate,
   };
 }

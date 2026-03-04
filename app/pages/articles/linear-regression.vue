@@ -28,10 +28,14 @@ onMounted(()=>{
 const theVector=new VectorObject(1,{x:0,y:0},{x:2,y:2});
 const thePoint=new PointObject(2,{x:1,y:1},3);
 const theFunction=new LinearFunctionObject(3,0,1,[0,3],100);
+const camera=new CameraObject(4,[-3,3],[-3,3]);
+const camera2=new CameraObject(4,[-2,4],[-3,3]);
 
 async function begin(){
   if(!graphRef.value)return;
 
+  graphRef.value.add(camera);
+  graphRef.value.add(camera2);
   graphRef.value.add(thePoint);
   graphRef.value.add(theVector);
   graphRef.value.add(theFunction);
@@ -76,10 +80,15 @@ async function clear(){
 async function update(){
   if(!graphRef.value)return;
 
-  await graphRef.value.play(
-    graphRef.value.animate.shift(thePoint,{x:1,y:1}),
-    graphRef.value.animate.shift(theVector,{x:-1,y:0}),
-  );
+  graphRef.value.setActiveCamera(camera2);
+  // await graphRef.value.play(
+  //   graphRef.value.animate.moveCamera(camera,[-6,6],[-6,6]),
+  // );
+
+  // await graphRef.value.play(
+  //   graphRef.value.animate.shift(thePoint,{x:1,y:1}),
+  //   graphRef.value.animate.shift(theVector,{x:-1,y:0}),
+  // );
   // what if the user alters the value of the slope of a linear function
   // I want the line to go to the point with an animation (maybe I could use lerp)
   // but sometimes I want the line to alter instanteneously (in the next tick)

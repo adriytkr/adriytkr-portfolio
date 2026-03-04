@@ -4,7 +4,8 @@ export type MathObjectType=
   'point'|
   'vector'|
   'function'|
-  'line';
+  'line'|
+  'camera';
 
 export abstract class MathObject{
   public id:number;

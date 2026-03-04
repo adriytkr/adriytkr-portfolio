@@ -5,6 +5,7 @@ const {
   remove,
   clear,
   play,
+  setActiveCamera,
   animate,
 }=useGraphEngine();
 
@@ -13,6 +14,7 @@ const api:GraphAPI={
   remove,
   clear,
   play,
+  setActiveCamera,
   animate,
 };
 defineExpose(api);
