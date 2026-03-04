@@ -16,7 +16,7 @@ export abstract class AbstractFunctionObject extends MathObject{
     super(id);
     this.domain=domain;
     this.samples=samples;
-    this.updatePoints();
+    this.m_isDirty=true;
   }
   public get points():Point[]{
     if(this.m_isDirty){
@@ -32,7 +32,8 @@ export abstract class AbstractFunctionObject extends MathObject{
     const newPoints=[];
     for(let i=0;i<=this.samples;i++){
       const x=x0+i*step;
-      newPoints.push({x,y:this.evaluate(x)});
+      const newPoint:Point={x,y:this.evaluate(x)};
+      newPoints.push(newPoint);
     }
     this.m_points=newPoints;
   }

@@ -1,5 +1,6 @@
-import { MathObject } from '~/shared/types/math/math-objects/bases';
-import {AbstractFunctionObject} from '~/shared/types/math/math-objects/AbstractFunctionObject';
+import { AbstractFunctionObject } from '~/shared/types/math/math-objects/AbstractFunctionObject';
+import type { MathObject } from '~/shared/types/math/math-objects/bases';
+
 import * as d3 from 'd3';
 
 export default function(){
@@ -81,50 +82,67 @@ export default function(){
       .attr('fill','black');
   }
 
+  function renderPoints(){
+    if(!components.points)return;
+
+    const points=objects.value.filter(object=>object instanceof PointObject);
+    components.points
+      .selectAll<SVGCircleElement,PointObject>('circle')
+      .data(points,p=>p.id)
+      .join('circle')
+      .attr('data-id',p=>p.id)
+      .attr('r',p=>p.size)
+      .attr('fill','black')
+      .attr('cx',p=>currentXScale(p.at.x))
+      .attr('cy',p=>currentYScale(p.at.y));
+  }
+
+  function renderVectors(){
+    if(!components.vectors)return;
+
+    const vectors=objects.value.filter(object=>object instanceof VectorObject);
+    components.vectors
+      .selectAll<SVGLineElement,VectorObject>('line')
+      .data(vectors,v=>v.id)
+      .join('line')
+      .attr('data-id',v=>v.id)
+      .attr('stroke','black')
+      .attr('stroke-width',3)
+      .attr('marker-end','url(#arrow)')
+      .attr('x1',v=>currentXScale(v.from.x))
+      .attr('y1',v=>currentYScale(v.from.y))
+      .attr('x2',v=>currentXScale(v.to.x))
+      .attr('y2',v=>currentYScale(v.to.y));
+  }
+
+  function renderFunctions(){
+    if(!components.functions)return;
+
+    const path=d3
+      .line<Point>()
+      .x(p=>currentXScale(p.x))
+      .y(p=>currentYScale(p.y));
+    const functions=objects.value.filter(object=>object instanceof AbstractFunctionObject);
+    components.functions
+      .selectAll<SVGPathElement,AbstractFunctionObject>('path')
+      .data(functions,f=>f.id)
+      .join('path')
+      .attr('data-id',f=>f.id)
+      .attr('fill','none')
+      .attr('stroke','black')
+      .attr('stroke-width',2)
+      .attr('d',f=>path(f.points));
+  }
+
+  function render(){
+    renderPoints();
+    renderVectors();
+    renderFunctions();
+  }
+
   function add(object:MathObject){
-    if(
-      !components.points||
-      !components.vectors||
-      !components.functions
-    )return;
-
     objects.value.push(object);
-
-    if(object instanceof PointObject){
-      components.points
-        .append('circle')
-        .datum(object)
-        .attr('data-id',object.id)
-        .attr('r',object.size)
-        .attr('fill','black')
-        .attr('cx',currentXScale(object.at.x))
-        .attr('cy',currentYScale(object.at.y));
-    }else if(object instanceof VectorObject){
-      components.vectors
-        .append('line')
-        .datum(object)
-        .attr('data-id',object.id)
-        .attr('stroke','black')
-        .attr('stroke-width',3)
-        .attr('marker-end','url(#arrow)')
-        .attr('x1',currentXScale(object.from.x))
-        .attr('y1',currentYScale(object.from.y))
-        .attr('x2',currentXScale(object.to.x))
-        .attr('y2',currentYScale(object.to.y));
-    }else if(object instanceof AbstractFunctionObject){
-      const path=d3
-        .line<Point>()
-        .x(p=>currentXScale(p.x))
-        .y(p=>currentYScale(p.y));
-      components.functions
-        .append('path')
-        .attr('data-id',object.id)
-        .datum(object)
-        .attr('fill','none')
-        .attr('stroke','black')
-        .attr('stroke-width',2)
-        .attr('d',path(object.points));
-    }
+    render();
   }
 
   function remove(object:MathObject){
