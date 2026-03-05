@@ -1,4 +1,4 @@
-import { GraphAPI2D } from '@math/engines/2d/GraphAPI2D';
+import { GraphAPI2D } from '@engines/2d/core/GraphAPI2D';
 
 export default function(){
   const containerRef=ref<SVGSVGElement|null>(null);
