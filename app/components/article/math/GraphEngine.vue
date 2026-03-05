@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import type { Preset } from '~/shared/types/math/engines/2d/types';
+
+const props=defineProps<{
+  preset:Preset,
+}>();
+
 const {
   containerRef,
   api,
-}=useGraphEngine();
+}=useGraphEngine(props.preset);
 
-defineExpose(api);
+defineExpose({
+  api,
+});
 </script>
 
 <template>

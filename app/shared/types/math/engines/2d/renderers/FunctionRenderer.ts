@@ -1,7 +1,11 @@
+import { BaseRenderer } from '../renderers/BaseRenderer';
+import type { RenderContext } from '../core';
+
+import type { CameraObject,AbstractFunctionObject } from '@math-objects';
+
+import type { Point,Interval } from '~/shared/types/math/basic';
+
 import * as d3 from 'd3';
-import { BaseRenderer } from '~/shared/types/math/engine/renderers/BaseRenderer';
-import type { RenderContext } from '~/shared/types/math/engine/core';
-import type { AbstractFunctionObject } from '~/shared/types/math/math-objects/AbstractFunctionObject';
 
 export class FunctionRenderer extends BaseRenderer<AbstractFunctionObject>{
   public constructor(

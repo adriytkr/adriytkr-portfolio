@@ -1,4 +1,5 @@
-import {AbstractFunctionObject} from '~/shared/types/math/math-objects/AbstractFunctionObject';
+import { AbstractFunctionObject } from '~/shared/types/math/math-objects/functions/AbstractFunctionObject';
+import type { MathFunction,Interval } from '~/shared/types/math/basic';
 
 export class GeneralFunctionObject extends AbstractFunctionObject{
   private m_f:MathFunction;

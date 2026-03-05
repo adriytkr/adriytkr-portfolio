@@ -1,5 +1,10 @@
-import { BaseAnimation } from '~/shared/types/math/engine/animations/BaseAnimation';
-import type { Shiftable } from '~/shared/types/math/math-objects/interfaces';
+import { BaseAnimation } from './BaseAnimation';
+import type { Shiftable } from '@math-objects/interfaces';
+
+import type { AnimationOptions } from '../core';
+import { DEFAULT_ANIMATION_OPTIONS } from '@constants/graph';
+
+import type { Point } from '~/shared/types/math/basic';
 
 export class ShiftAnimation extends BaseAnimation{
   private lastAlpha=0;
@@ -7,7 +12,7 @@ export class ShiftAnimation extends BaseAnimation{
   constructor(
     private object:Shiftable,
     private delta:Point,
-    options:AnimationOptions,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
   ){
     super(options);
   }

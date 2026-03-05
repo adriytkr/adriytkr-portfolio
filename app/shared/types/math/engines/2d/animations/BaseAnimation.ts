@@ -1,3 +1,5 @@
+import { DEFAULT_ANIMATION_OPTIONS } from '@constants/graph';
+
 export abstract class BaseAnimation{
   public startTime:number=0;
   public duration:number;

@@ -1,6 +1,14 @@
-import { BaseAnimation } from '~/shared/types/math/engine/animations/BaseAnimation';
+import { BaseAnimation } from './BaseAnimation';
 
-export class CameraTransition extends BaseAnimation{
+import { DEFAULT_ANIMATION_OPTIONS } from '@constants/graph';
+
+import type { CameraObject } from '@math-objects';
+
+import type { AnimationOptions } from '../core';
+
+import type { Interval } from '~/shared/types/math/basic';
+
+export class CameraTransitionAnimation extends BaseAnimation{
   public camera:CameraObject;
   public startDomain:Interval=[0,0];
   public startRange:Interval=[0,0];
@@ -11,7 +19,7 @@ export class CameraTransition extends BaseAnimation{
     camera:CameraObject,
     targetDomain:Interval,
     targetRange:Interval,
-    options:AnimationOptions,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
   ){
     super(options);
     this.camera=camera;

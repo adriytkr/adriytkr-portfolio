@@ -1,7 +1,8 @@
-import { MathObject, type MathObjectType } from '~/shared/types/math/math-objects/bases';
+import { MathObject } from '../core/MathObject';
+import type { MathFunction,Interval,Point } from '~/shared/types/math/basic';
 
 export abstract class AbstractFunctionObject extends MathObject{
-  public readonly type:MathObjectType='function';
+  public readonly type='function';
   public domain?:Interval;
   public samples:number;
 
@@ -18,6 +19,7 @@ export abstract class AbstractFunctionObject extends MathObject{
     this.domain=domain;
     this.m_isDirty=true;
   }
+
   public generatePoints(domain:Interval):Point[]{
     const [x0,x1]=domain;
     const step=(x1-x0)/this.samples;
@@ -29,5 +31,6 @@ export abstract class AbstractFunctionObject extends MathObject{
     }
     return newPoints;
   }
+
   public abstract evaluate:MathFunction;
 }

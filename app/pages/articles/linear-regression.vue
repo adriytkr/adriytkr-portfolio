@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { GraphAPI2D } from '@engines/2d/GraphAPI2D';
+
 const SLUG='linear-regression';
 const sections:string[]=[
   'introduction',
@@ -20,32 +22,29 @@ definePageMeta({
 
 useArticleMeta(SLUG);
 
-const graphRef=ref<GraphAPI|null>(null);
+const graphRef=ref<{api:GraphAPI2D}|null>(null);
 onMounted(()=>{
   if(!graphRef.value)return;
 });
 
-const theVector=new VectorObject(1,{x:0,y:0},{x:2,y:2});
-const thePoint=new PointObject(2,{x:1,y:-1},5);
 const camera=new CameraObject(4,[-3,3],[-3,3]);
-const camera2=new CameraObject(5,[-2,4],[-3,3]);
-const theFunction=new GeneralFunctionObject(6,x=>x**2,100);
 const linearFunction=new LinearFunctionObject(7,3,1,5,[-3,3]);
 
 async function begin(){
   if(!graphRef.value)return;
+  if(!graphRef.value.api)return;
 
-  graphRef.value.startAnimationLoop();
-  graphRef.value.add(camera);
-  graphRef.value.setActiveCamera(camera);
-  graphRef.value.add(theVector);
-  graphRef.value.add(linearFunction)
-  await graphRef.value.play(
-    graphRef.value.animate.fadeIn(linearFunction),
+  graphRef.value.api.startAnimationLoop();
+  graphRef.value.api.add(camera);
+  graphRef.value.api.setActiveCamera(camera);
+  graphRef.value.api.add(linearFunction);
+
+  await graphRef.value.api.play(
+    graphRef.value.api.animate.fadeIn(linearFunction),
   );
-  // graphRef.value.add(thePoint);
-  // graphRef.value.add(theVector);
-  // graphRef.value.add(theFunction);
+  // graphRef.value.api.add(thePoint);
+  // graphRef.value.api.add(theVector);
+  // graphRef.value.api.add(theFunction);
   // await graphRef.value.play(
   //   graphRef.value.animate.fadeIn(thePoint),
   //   graphRef.value.animate.fadeIn(theVector),
@@ -68,7 +67,6 @@ async function begin(){
 async function remove(){
   if(!graphRef.value)return;
 
-  console.log(graphRef.value);
   // await graphRef.value.play(
   //   graphRef.value.animate().fadeOut(theVector),
   // );
@@ -82,58 +80,23 @@ async function remove(){
 async function clear(){
   if(!graphRef.value)return;
 
-  graphRef.value.clear();
+  graphRef.value.api.clear();
 }
 
 async function update(){
   if(!graphRef.value)return;
 
-  // graphRef.value.setActiveCamera(camera2);
-  await graphRef.value.play(
-    graphRef.value.animate.moveCamera(camera,[-6,6],[-6,6]),
-  )
-
-  // await graphRef.value.play(
-  //   graphRef.value.animate.shift(thePoint,{x:1,y:1}),
-  //   graphRef.value.animate.shift(theVector,{x:-1,y:0}),
-  // );
   // what if the user alters the value of the slope of a linear function
   // I want the line to go to the point with an animation (maybe I could use lerp)
   // but sometimes I want the line to alter instanteneously (in the next tick)
-  // theFunction.setParameters(3,2);
-  // graphRef.value.updateScene();
-
-  // // or if I wanted to change parameters smoothly (interpolation)
-  // await graphRef.value.play(
-  //   graphRef.value.customAnimation(
-  //     (alpha:number)=>{ // alpha is a value between 0 and 1 based on the duration
-  //       theFunction.setParameters(lerp(3,6,t),2); // change slope from 3 to 6 smoothly. y-intercept doesn't change
-  //       // maybe we should call graphRef.value.updateScene()???? idk
-  //     },
-  //     {duration:2000},
-  //   ),
-  // );
-
-  // // the customAnimation above could be written as
-  // await graphRef.value.play(
-  //   graphRef.value.interpolate(
-  //     3, // initial slope
-  //     6, // final slope
-  //     (value:number)=>{
-  //       theFunction.setParameters(value,2); // change slope from 3 to 6 smoothly. y-intercept doesn't change
-  //       // maybe we should call graphRef.value.updateScene()???? idk
-  //     },
-  //     {duration:3000},
-  //   ),
-  // );
-
-  // should I call play everytime I want to play some animation???
+  linearFunction.setParameters(-3,1);
+  graphRef.value.api.requestUpdate();
 }
 </script>
 
 <template>
   <ArticleSection title="Introduction" id="introduction">
-    <ArticleMathGraphEngine ref="graphRef"/>
+    <ArticleMathGraphEngine preset="standard" ref="graphRef"/>
     <button @click="begin">Begin</button>
     <button @click="remove">Remove</button>
     <button @click="clear">Clear</button>

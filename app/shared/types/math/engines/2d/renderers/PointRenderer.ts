@@ -1,5 +1,9 @@
-import type { RenderContext } from '~/shared/types/math/engine/core';
-import { BaseRenderer } from '~/shared/types/math/engine/renderers/BaseRenderer';
+import { BaseRenderer } from '../renderers/BaseRenderer';
+import type { RenderContext } from '../core';
+
+import type { PointObject } from '@math-objects';
+
+import * as d3 from 'd3';
 
 export class PointRenderer extends BaseRenderer<PointObject>{
   public constructor(
@@ -9,7 +13,7 @@ export class PointRenderer extends BaseRenderer<PointObject>{
   }
 
   public override render(
-    points:globalThis.PointObject[],
+    points:PointObject[],
     context:RenderContext,
   ){
     const {xScale,yScale,getObjectStyle}=context;

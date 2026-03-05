@@ -1,15 +1,17 @@
-import { MathObject, type MathObjectType } from '~/shared/types/math/math-objects/bases';
-import type {Interval} from '~/shared/types/math/basic';
+import { MathObject } from '../core/MathObject';
+import type { Interval,Point } from '~/shared/types/math/basic';
 
 export class CameraObject extends MathObject{
   public readonly type:MathObjectType='camera';
   public domain:Interval;
   public range:Interval;
+
   constructor(id:number,domain:Interval,range:Interval){
     super(id);
     this.domain=domain;
     this.range=range;
   }
+
   public shift(delta:Point){
     this.domain=[
       this.domain[0]+delta.x,

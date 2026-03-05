@@ -1,6 +1,9 @@
-import { BaseAnimation } from '~/shared/types/math/engine/animations/BaseAnimation';
-import type { MathObject } from '~/shared/types/math/math-objects/bases';
-import type { ObjectStyle } from '~/shared/types/math/engine/api';
+import { BaseAnimation } from './BaseAnimation';
+import type { MathObject } from '@math-objects';
+import type { ObjectStyle } from '../core';
+
+import type { AnimationOptions } from '../core';
+import { DEFAULT_ANIMATION_OPTIONS } from '@constants/graph';
 
 export class FadeOutAnimation extends BaseAnimation{
   private style:ObjectStyle;
@@ -8,7 +11,7 @@ export class FadeOutAnimation extends BaseAnimation{
   constructor(
     object: MathObject,
     style:ObjectStyle,
-    options:AnimationOptions,
+    options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
   ){
     super(options);
     this.style=style;

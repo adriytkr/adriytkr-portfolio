@@ -1,10 +1,12 @@
-import { SegmentObject, type MathObjectType } from '~/shared/types/math/math-objects/bases';
+import { SegmentObject } from './SegmentObject';
+import type { Point } from '~/shared/types/math/basic'; 
 
 export class VectorObject extends SegmentObject implements Shiftable{
-  public readonly type:MathObjectType='vector';
+  public override readonly type:MathObjectType='vector';
   constructor(id:number,from:Point,to:Point){
     super(id,from,to);
   }
+
   public shift(delta:Point){
     this.from={
       x:this.from.x+delta.x,

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { DEFAULT_LANGUAGE,LANGUAGES } from '@constants/languages';
+
 const {locale,setLocale}=useI18n();
 
 const selectedLanguage=computed<Language>(()=>

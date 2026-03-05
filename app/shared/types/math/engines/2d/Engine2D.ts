@@ -1,20 +1,23 @@
-import type { MathObject, MathObjectType } from '~/shared/types/math/math-objects/bases';
-import type { ObjectStyle } from '~/shared/types/math/engine/api';
-import type { BaseAnimation } from '~/shared/types/math/engine/animations/BaseAnimation';
-import { CameraObject } from '~/shared/types/math/math-objects/CameraObject';
-import type { RenderContext } from '~/shared/types/math/engine/core';
-import type { BaseRenderer } from '~/shared/types/math/engine/renderers/BaseRenderer';
+import { AnimationFactory } from './animations/';
+import type { BaseAnimation } from './animations';
 
-import {DEFAULT_CAMERA} from '~/shared/constants/graph';
+import type { ObjectStyle } from './core';
+
+import { CameraObject } from '@math-objects';
+import type { MathObject } from '@math-objects';
+
+import type { RenderContext } from './core';
+import { BaseRenderer } from './renderers/';
+
+import { DEFAULT_CAMERA } from '~/shared/constants/graph';
 
 import * as d3 from 'd3';
-import { AnimationFactory } from '~/shared/types/math/engine/AnimationFactory';
 
-export class Engine{
+export class Engine2D{
   public readonly animate:AnimationFactory;
 
   private m_svg:d3.Selection<SVGSVGElement,unknown,null,undefined>;
-  private _root:d3.Selection<SVGGElement,unknown,null,undefined>;
+  private m_root:d3.Selection<SVGGElement,unknown,null,undefined>;
 
   private m_width=0;
   private m_height=0;
@@ -30,11 +33,11 @@ export class Engine{
   private m_cameras:CameraObject[]=[];
   private m_activeCamera:CameraObject=DEFAULT_CAMERA;
   private m_needsUpdate=false;
-  private m_renderers=new Map<MathObjectType,BaseRenderer<MathObject>>;
+  private m_renderers=new Map<string,BaseRenderer<MathObject>>;
 
   public constructor(svgElement:SVGSVGElement){
     this.m_svg=d3.select(svgElement);
-    this._root=this.m_svg
+    this.m_root=this.m_svg
       .append('g')
       .attr('class','root');
 
@@ -43,29 +46,15 @@ export class Engine{
 
     this.m_svg.attr('viewBox',`0 0 ${this.m_width} ${this.m_height}`);
 
-    this.m_renderers.set('point',new PointRenderer(this._root));
-    this.m_renderers.set('function',new FunctionRenderer(this._root));
-    this.m_renderers.set('vector',new VectorRenderer(this._root));
-
-    this.m_svg
-      .append('defs')
-      .append('marker')
-      .attr('id','arrow')
-      .attr('viewBox','0 0 10 10')
-      .attr('refX',10)
-      .attr('refY',5)
-      .attr('markerWidth',6)
-      .attr('markerHeight',6)
-      .attr('orient','auto')
-      .append('path')
-      .attr('d','M 0 0 L 10 5 L 0 10 z')
-      .attr('fill','black');
-
     this.m_needsUpdate=true;
 
     this.initZoom();
     this.updateScalesFromCamera();
     this.animate=new AnimationFactory(this);
+  }
+
+  public get root():d3.Selection<SVGGElement,unknown,null,undefined>{
+    return this.m_root;
   }
 
   private initZoom(){
@@ -104,7 +93,10 @@ export class Engine{
     if(this.m_animations.length===0&&!this.m_needsUpdate)return;
 
     if(this.m_animations.length>0){
-      this.m_animations.forEach((anim,index)=>{
+      for(let index=0;index<this.m_animations.length;index++){
+        const anim=this.m_animations[index];
+        if(!anim)continue;
+
         const elapsed=now-anim.startTime;
         const alpha=Math.min(elapsed/anim.duration,1);
 
@@ -115,7 +107,7 @@ export class Engine{
           this.m_animations.splice(index,1);
         }
         this.m_needsUpdate=true;
-      });
+      }
     }
 
     if(this.m_needsUpdate){
@@ -180,6 +172,14 @@ export class Engine{
       const objs=this.m_objects.filter(object=>object.type===type);
       renderer.render(objs,context);
     });
+  }
+
+  public registerRenderer(name:string,renderer:BaseRenderer<MathObject>){
+    this.m_renderers.set(name,renderer);
+  }
+
+  public requestUpdate(){
+    this.m_needsUpdate=true;
   }
 
   public add=(object:MathObject)=>{

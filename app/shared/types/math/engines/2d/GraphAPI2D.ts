@@ -1,16 +1,24 @@
-import type { Animations, IGraphAPI } from '~/shared/types/math/engine/api';
-import type { MathObject } from '../math-objects/bases';
-import {Engine} from '~/shared/types/math/engine/Engine';
-import type { BaseAnimation } from './animations/BaseAnimation';
+import type { IGraphAPI2D } from './core';
 
-export class GraphAPI implements IGraphAPI{
-  private m_engine:Engine|null=null;
+import type { BaseAnimation } from './animations';
+
+import type { MathObject } from '@math-objects';
+
+import { Engine2D } from './Engine2D';
+import type { BaseRenderer } from './renderers';
+
+export class GraphAPI2D implements IGraphAPI2D{
+  private m_engine:Engine2D|null=null;
 
   public isReady=false;
 
-  public init(svg:SVGSVGElement){
-    this.m_engine=new Engine(svg);
+  public get root(){
+    if(!this.m_engine)throw Error('Engine is unmounted');
+    return this.m_engine.root;
+  }
 
+  public init(svg:SVGSVGElement){
+    this.m_engine=new Engine2D(svg);
     this.isReady=true;
   }
 
@@ -49,5 +57,15 @@ export class GraphAPI implements IGraphAPI{
       throw Error('Engine is unmounted');
 
     return this.m_engine.animate;
+  }
+
+  public requestUpdate(){
+    if(!this.m_engine)return;
+    this.m_engine.requestUpdate();
+  }
+
+  public registerRenderer(name:string,renderer:BaseRenderer<MathObject>){
+    if(!this.m_engine)return;
+    this.m_engine.registerRenderer(name,renderer);
   }
 }

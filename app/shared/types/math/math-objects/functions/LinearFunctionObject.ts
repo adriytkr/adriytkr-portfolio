@@ -1,4 +1,5 @@
-import {AbstractFunctionObject} from '~/shared/types/math/math-objects/AbstractFunctionObject';
+import {AbstractFunctionObject} from '~/shared/types/math/math-objects/functions/AbstractFunctionObject';
+import type { Interval } from '~/shared/types/math/basic';
 
 export class LinearFunctionObject extends AbstractFunctionObject{
   private m_m:number;
