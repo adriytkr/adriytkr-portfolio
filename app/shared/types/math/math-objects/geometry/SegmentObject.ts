@@ -6,8 +6,8 @@ export abstract class SegmentObject extends MathObject implements Growable{
   public from:Point;
   public to:Point;
 
-  constructor(id:number,from:Point,to:Point){
-    super(id);
+  constructor(from:Point,to:Point){
+    super();
     this.from=from;
     this.to=to;
   }

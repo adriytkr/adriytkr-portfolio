@@ -1,21 +1,16 @@
-import { AnimationFactory } from './animations/';
 import type { BaseAnimation } from './animations';
-
-import type { ObjectStyle } from './core';
 
 import { CameraObject } from '@math-objects';
 import type { MathObject } from '@math-objects';
 
 import type { RenderContext } from './core';
-import { BaseRenderer } from './renderers/';
 
 import { DEFAULT_CAMERA } from '~/shared/constants/graph';
 
 import * as d3 from 'd3';
+import type { SceneNode } from './SceneNode';
 
 export class Engine2D{
-  public readonly animate:AnimationFactory;
-
   private m_svg:d3.Selection<SVGSVGElement,unknown,null,undefined>;
   private m_root:d3.Selection<SVGGElement,unknown,null,undefined>;
 
@@ -27,13 +22,14 @@ export class Engine2D{
   private m_currentXScale!:d3.ScaleLinear<number,number>;
   private m_currentYScale!:d3.ScaleLinear<number,number>;
 
-  private m_objects:MathObject[]=[];
-  private m_objectStyles=new WeakMap<MathObject,ObjectStyle>();
+  private m_nodes:SceneNode<MathObject>[]=[];
+
   private m_animations:BaseAnimation[]=[];
+
   private m_cameras:CameraObject[]=[];
   private m_activeCamera:CameraObject=DEFAULT_CAMERA;
-  private m_needsUpdate=false;
-  private m_renderers=new Map<string,BaseRenderer<MathObject>>;
+
+  private m_needsUpdate:boolean=true;
 
   public constructor(svgElement:SVGSVGElement){
     this.m_svg=d3.select(svgElement);
@@ -46,11 +42,8 @@ export class Engine2D{
 
     this.m_svg.attr('viewBox',`0 0 ${this.m_width} ${this.m_height}`);
 
-    this.m_needsUpdate=true;
-
     this.initZoom();
     this.updateScalesFromCamera();
-    this.animate=new AnimationFactory(this);
   }
 
   public get root():d3.Selection<SVGGElement,unknown,null,undefined>{
@@ -73,52 +66,6 @@ export class Engine2D{
         this.m_needsUpdate=true;
       });
     this.m_svg.call(zoomBehavior);
-  }
-
-  public play=(...anims:BaseAnimation[])=>{
-    return Promise.all(
-      anims.map(anim=>
-        new Promise<void>(resolve=>{
-          anim.setup();
-          anim.startTime=performance.now();
-          anim.resolve=resolve;
-          this.m_animations.push(anim);
-        })
-      ),
-    );
-  }
-
-  private tick=(now:number)=>{
-    requestAnimationFrame(this.tick);
-    if(this.m_animations.length===0&&!this.m_needsUpdate)return;
-
-    if(this.m_animations.length>0){
-      for(let index=0;index<this.m_animations.length;index++){
-        const anim=this.m_animations[index];
-        if(!anim)continue;
-
-        const elapsed=now-anim.startTime;
-        const alpha=Math.min(elapsed/anim.duration,1);
-
-        anim.update(alpha);
-
-        if(alpha===1){
-          anim.resolve();
-          this.m_animations.splice(index,1);
-        }
-        this.m_needsUpdate=true;
-      }
-    }
-
-    if(this.m_needsUpdate){
-      this.updateScalesFromCamera();
-      this.updateScene();
-      this.m_needsUpdate=false;
-    }
-  }
-
-  public startAnimationLoop=()=>{
-    requestAnimationFrame(this.tick);
   }
 
   private updateScalesFromCamera=()=>{
@@ -160,56 +107,93 @@ export class Engine2D{
     this.updateScene();
   }
 
-  private updateScene(){
-    const context:RenderContext={
-      xScale:this.m_currentXScale,
-      yScale:this.m_currentYScale,
-      activeCamera:this.m_activeCamera,
-      getObjectStyle:this.getObjectStyle,
-    };
-
-    this.m_renderers.forEach((renderer,type)=>{
-      const objs=this.m_objects.filter(object=>object.type===type);
-      renderer.render(objs,context);
-    });
+  public play=(...anims:BaseAnimation[])=>{
+    return Promise.all(
+      anims.map(anim=>
+        new Promise<void>(resolve=>{
+          anim.setup();
+          anim.startTime=performance.now();
+          anim.resolve=resolve;
+          this.m_animations.push(anim);
+        })
+      ),
+    );
   }
 
-  public registerRenderer(name:string,renderer:BaseRenderer<MathObject>){
-    this.m_renderers.set(name,renderer);
+  private tick=(now:number)=>{
+    requestAnimationFrame(this.tick);
+
+    const isSomeAnimationRunning=this.m_animations.length>0;
+    if(!isSomeAnimationRunning&&!this.m_needsUpdate)return;
+
+    if(isSomeAnimationRunning){
+      const context=this.getRenderContext();
+
+      this.m_animations=this.m_animations.filter(animation=>{
+        const elapsed=now-animation.startTime;
+        const alpha=Math.min(elapsed/animation.duration,1);
+
+        animation.update(alpha,context);
+
+        if(alpha===1){
+          animation.resolve();
+          return false;
+        }
+
+        return true;
+      });
+
+      this.m_needsUpdate=true;
+    }
+
+    if(this.m_needsUpdate){
+      this.updateScalesFromCamera();
+      this.updateScene();
+      this.m_needsUpdate=false;
+    }
+  }
+
+  public startAnimationLoop=()=>{
+    requestAnimationFrame(this.tick);
+  }
+
+  private getRenderContext=():RenderContext=>({
+    xScale:this.m_currentXScale,
+    yScale:this.m_currentYScale,
+    activeCamera:this.m_activeCamera,
+  });
+
+  private updateScene(){
+    const context=this.getRenderContext();
+    const renderers=Map.groupBy(this.m_nodes,node=>node.renderer);
+    renderers.forEach((nodes,renderer)=>{
+      if(!renderer.isMounted)
+        renderer.mount(this.m_root);
+      renderer.render(nodes,context)
+    });
   }
 
   public requestUpdate(){
     this.m_needsUpdate=true;
   }
 
-  public add=(object:MathObject)=>{
+  public add=<T extends MathObject>(object:SceneNode<T>|CameraObject)=>{
     if(object instanceof CameraObject){
       this.m_cameras.push(object);
-      if(!this.m_activeCamera)this.setActiveCamera(object);
-    }else{
-      this.m_objects.push(object);
-      this.m_objectStyles.set(object,{opacity:1});
-      this.m_needsUpdate=true;
+      return;
     }
+
+    this.m_nodes.push(object);
+    this.m_needsUpdate=true;
   }
 
-  public remove=(object:MathObject)=>{
-    this.m_objects=this.m_objects.filter(o=>o.id!==object.id);
+  public remove=<T extends MathObject>(node:SceneNode<T>)=>{
+    this.m_nodes=this.m_nodes.filter(n=>node.id!==n.id);
     this.m_needsUpdate=true;
   }
 
   public clear=()=>{
-    this.m_objects=[];
-    this.m_renderers.forEach(renderer=>renderer.clear());
+    this.m_nodes=[];
     this.m_needsUpdate=true;
-  }
-
-  public getObjectStyle=(object:MathObject):ObjectStyle=>{
-    let style=this.m_objectStyles.get(object);
-    if(!style){
-      style={opacity:1};
-      this.m_objectStyles.set(object,{opacity:1});
-    }
-    return style;
   }
 }

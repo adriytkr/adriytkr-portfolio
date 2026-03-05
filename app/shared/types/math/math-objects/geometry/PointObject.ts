@@ -2,12 +2,11 @@ import { MathObject } from '../core/MathObject';
 import type { Point,Matrix2x2 } from '~/shared/types/math/basic'; 
 
 export class PointObject extends MathObject implements Shiftable{
-  public readonly type:MathObjectType='point';
   public at:Point;
   public size:number;
 
-  public constructor(id:number,at:Point,size:number){
-    super(id);
+  public constructor(at:Point,size:number){
+    super();
     this.at=at;
     this.size=size;
   }

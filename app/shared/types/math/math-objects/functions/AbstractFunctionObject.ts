@@ -2,7 +2,6 @@ import { MathObject } from '../core/MathObject';
 import type { MathFunction,Interval,Point } from '~/shared/types/math/basic';
 
 export abstract class AbstractFunctionObject extends MathObject{
-  public readonly type='function';
   public domain?:Interval;
   public samples:number;
 
@@ -10,11 +9,10 @@ export abstract class AbstractFunctionObject extends MathObject{
   protected m_isDirty=true;
 
   constructor(
-    id:number,
     samples:number,
     domain?:Interval,
   ){
-    super(id);
+    super();
     this.samples=samples;
     this.domain=domain;
     this.m_isDirty=true;

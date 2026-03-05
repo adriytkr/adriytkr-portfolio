@@ -1,28 +1,26 @@
 import { BaseAnimation } from './BaseAnimation';
 import type { MathObject } from '@math-objects';
-import type { ObjectStyle } from '../core';
 
-import type { AnimationOptions } from '../core';
+import type { AnimationOptions } from './types';
 import { DEFAULT_ANIMATION_OPTIONS } from '@constants/graph';
 
 export class FadeOutAnimation extends BaseAnimation{
-  private style:ObjectStyle;
+  private m_node:SceneNode<MathObject>;
 
   constructor(
-    object: MathObject,
-    style:ObjectStyle,
+    node: SceneNode<MathObject>,
     options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
   ){
     super(options);
-    this.style=style;
+    this.m_node=node;
   }
 
   override setup(){
-    this.style.opacity=0;
+    this.m_node.style.opacity=1;
   }
 
   override update(alpha:number){
-    this.style.opacity=1-alpha;
+    this.m_node.style.opacity=1-alpha;
   }
 
   override resolve():void{}

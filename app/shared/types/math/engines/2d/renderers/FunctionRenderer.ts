@@ -8,25 +8,25 @@ import type { Point,Interval } from '~/shared/types/math/basic';
 import * as d3 from 'd3';
 
 export class FunctionRenderer extends BaseRenderer<AbstractFunctionObject>{
-  public constructor(
-    parentSlection:d3.Selection<SVGGElement,unknown,null,undefined>,
-  ){
-    super(parentSlection,'functions-layer');
+  public override get layerName(){
+    return 'function';
   }
 
   public override render(
-    functions:AbstractFunctionObject[],
+    functions:SceneNode<AbstractFunctionObject>[],
     context:RenderContext,
   ){
-    const {xScale,yScale,activeCamera,getObjectStyle}=context;
+    if(!this.m_group)return;
+
+    const {xScale,yScale,activeCamera}=context;
 
     const pathGenerator=d3
       .line<Point>()
       .x(p=>xScale(p.x))
       .y(p=>yScale(p.y));
 
-    this.group
-      .selectAll<SVGPathElement,AbstractFunctionObject>('path.function')
+    this.m_group
+      .selectAll<SVGPathElement,SceneNode<AbstractFunctionObject>>('path.function')
       .data(functions,f=>f.id)
       .join(
         enter=>
@@ -40,8 +40,8 @@ export class FunctionRenderer extends BaseRenderer<AbstractFunctionObject>{
         update=>update,
         exit=>exit.remove(),
       )
-      .attr('d',f=>this.genereatePathBasedOnCameraBounds(f,activeCamera,pathGenerator))
-      .style('opacity',f=>getObjectStyle(f).opacity);
+      .attr('d',f=>this.genereatePathBasedOnCameraBounds(f.data,activeCamera,pathGenerator))
+      .style('opacity',f=>f.style.opacity);
   }
 
   public genereatePathBasedOnCameraBounds(

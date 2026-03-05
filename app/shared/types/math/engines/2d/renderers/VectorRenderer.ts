@@ -6,15 +6,19 @@ import type { VectorObject } from '@math-objects';
 import * as d3 from 'd3';
 
 export class VectorRenderer extends BaseRenderer<VectorObject>{
-  public constructor(
-    parentSlection:d3.Selection<SVGGElement,unknown,null,undefined>,
-  ){
-    super(parentSlection,'vectors-layer');
+  public override get layerName(){
+    return 'vector';
+  }
+
+  public override mount(root:d3.Selection<SVGGElement,unknown,null,undefined>){
+    super.mount(root);
     this.addArrowHeadMarker();
   }
 
   private addArrowHeadMarker(){
-    const svg=d3.select(this.group.node());
+    if(!this.m_group)return;
+
+    const svg=d3.select(this.m_group.node());
     if(svg){
       const defs=svg.select('defs').empty()
         ?svg.append('defs')
@@ -37,13 +41,15 @@ export class VectorRenderer extends BaseRenderer<VectorObject>{
   }
 
   public override render(
-    vectors:VectorObject[],
+    vectors:SceneNode<VectorObject>[],
     context:RenderContext,
   ){
-    const {xScale,yScale,getObjectStyle}=context;
+    if(!this.m_group)return;
 
-    this.group
-      .selectAll<SVGLineElement,VectorObject>('line.vector')
+    const {xScale,yScale}=context;
+
+    this.m_group
+      .selectAll<SVGLineElement,SceneNode<VectorObject>>('line.vector')
       .data(vectors,v=>v.id)
       .join(
         enter=>
@@ -57,10 +63,10 @@ export class VectorRenderer extends BaseRenderer<VectorObject>{
         update=>update,
         exit=>exit.remove(),
       )
-      .style('opacity',v=>getObjectStyle(v).opacity)
-      .attr('x1',v=>xScale(v.from.x))
-      .attr('y1',v=>yScale(v.from.y))
-      .attr('x2',v=>xScale(v.to.x))
-      .attr('y2',v=>yScale(v.to.y));
+      .style('opacity',v=>v.style.opacity)
+      .attr('x1',v=>xScale(v.data.from.x))
+      .attr('y1',v=>yScale(v.data.from.y))
+      .attr('x2',v=>xScale(v.data.to.x))
+      .attr('y2',v=>yScale(v.data.to.y));
   }
 }

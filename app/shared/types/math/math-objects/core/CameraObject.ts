@@ -2,12 +2,11 @@ import { MathObject } from '../core/MathObject';
 import type { Interval,Point } from '~/shared/types/math/basic';
 
 export class CameraObject extends MathObject{
-  public readonly type:MathObjectType='camera';
   public domain:Interval;
   public range:Interval;
 
-  constructor(id:number,domain:Interval,range:Interval){
-    super(id);
+  constructor(domain:Interval,range:Interval){
+    super();
     this.domain=domain;
     this.range=range;
   }

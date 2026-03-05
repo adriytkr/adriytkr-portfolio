@@ -5,7 +5,8 @@ import type { BaseAnimation } from './animations';
 import type { MathObject } from '@math-objects';
 
 import { Engine2D } from './Engine2D';
-import type { BaseRenderer } from './renderers';
+import { PointRenderer, type BaseRenderer } from './renderers';
+import type { SceneNode } from './SceneNode';
 
 export class GraphAPI2D implements IGraphAPI2D{
   private m_engine:Engine2D|null=null;
@@ -27,14 +28,14 @@ export class GraphAPI2D implements IGraphAPI2D{
     this.m_engine.startAnimationLoop();
   }
 
-  public add(object:MathObject){
-    if(!this.m_engine)return;
-    this.m_engine.add(object);
+  public add=<T extends MathObject>(node:SceneNode<T>|CameraObject)=>{
+    if(!this.m_engine) throw Error('Engine is unmounted');
+    this.m_engine.add(node);
   }
 
-  public remove(object:MathObject){
+  public remove=<T extends MathObject>(node:SceneNode<T>)=>{
     if(!this.m_engine)return;
-    this.m_engine.remove(object);
+    this.m_engine.remove(node);
   }
 
   public clear(){

@@ -2,9 +2,8 @@ import { SegmentObject } from './SegmentObject';
 import type { Point } from '~/shared/types/math/basic'; 
 
 export class VectorObject extends SegmentObject implements Shiftable{
-  public override readonly type:MathObjectType='vector';
-  constructor(id:number,from:Point,to:Point){
-    super(id,from,to);
+  constructor(from:Point,to:Point){
+    super(from,to);
   }
 
   public shift(delta:Point){

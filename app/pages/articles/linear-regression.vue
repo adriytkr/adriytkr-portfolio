@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { GraphAPI2D } from '@engines/2d/GraphAPI2D';
+import { SceneNode } from '~/shared/types/math/engines/2d/SceneNode';
 
 const SLUG='linear-regression';
 const sections:string[]=[
@@ -27,54 +28,45 @@ onMounted(()=>{
   if(!graphRef.value)return;
 });
 
-const camera=new CameraObject(4,[-3,3],[-3,3]);
-const linearFunction=new LinearFunctionObject(7,3,1,5,[-3,3]);
+const camera=new CameraObject([-3,3],[-3,3]);
+
+const node=new SceneNode(
+  1,
+  new LinearFunctionObject(3,1,5,[-3,3]),
+  {opacity:1},
+  new FunctionRenderer(),
+);
+
+const node2=new SceneNode(
+  1,
+  new QuadraticFunctionObject(2,3,1,100),
+  {opacity:1},
+  new FunctionRenderer(),
+);
 
 async function begin(){
   if(!graphRef.value)return;
   if(!graphRef.value.api)return;
 
-  graphRef.value.api.startAnimationLoop();
   graphRef.value.api.add(camera);
   graphRef.value.api.setActiveCamera(camera);
-  graphRef.value.api.add(linearFunction);
+  graphRef.value.api.startAnimationLoop();
+
+  graphRef.value.api.add(node);
+  graphRef.value.api.add(node2);
 
   await graphRef.value.api.play(
-    graphRef.value.api.animate.fadeIn(linearFunction),
+    new FadeInAnimation(node),
+    new FadeInAnimation(node2),
   );
-  // graphRef.value.api.add(thePoint);
-  // graphRef.value.api.add(theVector);
-  // graphRef.value.api.add(theFunction);
-  // await graphRef.value.play(
-  //   graphRef.value.animate.fadeIn(thePoint),
-  //   graphRef.value.animate.fadeIn(theVector),
-  //   graphRef.value.animate.fadeIn(theFunction),
-  // );
-  // graphRef.value.add(theVector); // this adds immediately on the scene
-  // graphRef.value.add(thePoint); // this adds immediately on the scene
-  // graphRef.value.add(theFunction); // this adds immediately on the scene
-  // graphRef.value.remove(theVector); // this removes immediately on the scene
-
-  // if i wanted I could add the vector with a specific animation
-  // I could add two objects simultaneously (they may have different durations)
-  // await graphRef.value.play(
-  //   graphRef.value.animate.grow(theVector,{duration:1000}), // there are animations that only work with specific math objects
-  //   graphRef.value.animate.fadeIn(theVector,{duration:500}),
-  // );
-  console.log('run after animation end');
 }
 
 async function remove(){
   if(!graphRef.value)return;
+  if(!graphRef.value.api)return;
 
-  // await graphRef.value.play(
-  //   graphRef.value.animate().fadeOut(theVector),
-  // );
-  // graphRef.value.remove(theVector);
-  // await graphRef.value.play(
-  //   graphRef.value.animate.fadeOut(theFunction),
-  // );
-  // graphRef.value.remove(theFunction);
+  graphRef.value.api.remove(node);
+  graphRef.value.api.requestUpdate();
 }
 
 async function clear(){
@@ -85,18 +77,12 @@ async function clear(){
 
 async function update(){
   if(!graphRef.value)return;
-
-  // what if the user alters the value of the slope of a linear function
-  // I want the line to go to the point with an animation (maybe I could use lerp)
-  // but sometimes I want the line to alter instanteneously (in the next tick)
-  linearFunction.setParameters(-3,1);
-  graphRef.value.api.requestUpdate();
 }
 </script>
 
 <template>
   <ArticleSection title="Introduction" id="introduction">
-    <ArticleMathGraphEngine preset="standard" ref="graphRef"/>
+    <ArticleMathGraphEngine ref="graphRef"/>
     <button @click="begin">Begin</button>
     <button @click="remove">Remove</button>
     <button @click="clear">Clear</button>

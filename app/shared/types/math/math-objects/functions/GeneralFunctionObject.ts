@@ -4,12 +4,11 @@ import type { MathFunction,Interval } from '~/shared/types/math/basic';
 export class GeneralFunctionObject extends AbstractFunctionObject{
   private m_f:MathFunction;
   constructor(
-    id:number,
     f:MathFunction,
     samples:number,
     domain?:Interval,
   ){
-    super(id,samples,domain);
+    super(samples,domain);
     this.m_f=f;
   }
   public setFunction(f:MathFunction){

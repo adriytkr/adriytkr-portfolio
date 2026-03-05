@@ -4,7 +4,7 @@ import { DEFAULT_ANIMATION_OPTIONS } from '@constants/graph';
 
 import type { CameraObject } from '@math-objects';
 
-import type { AnimationOptions } from '../core';
+import type { AnimationOptions } from './types';
 
 import type { Interval } from '~/shared/types/math/basic';
 

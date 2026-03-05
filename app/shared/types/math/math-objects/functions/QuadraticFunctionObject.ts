@@ -8,14 +8,13 @@ export class QuadraticFunctionObject extends AbstractFunctionObject{
   private m_c:number;
 
   public constructor(
-    id:number,
     a:number,
     b:number,
     c:number,
     samples:number,
     domain?:Interval
   ){
-    super(id,samples,domain);
+    super(samples,domain);
     this.m_a=a;
     this.m_b=b;
     this.m_c=c;

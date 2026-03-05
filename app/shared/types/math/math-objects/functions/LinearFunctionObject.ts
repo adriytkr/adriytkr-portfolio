@@ -6,13 +6,12 @@ export class LinearFunctionObject extends AbstractFunctionObject{
   private m_b:number;
 
   public constructor(
-    id:number,
     slope:number,
     yIntercept:number,
     samples:number,
     domain?:Interval,
   ){
-    super(id,samples,domain);
+    super(samples,domain);
     this.m_m=slope;
     this.m_b=yIntercept;
   }
