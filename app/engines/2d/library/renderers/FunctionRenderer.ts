@@ -3,16 +3,17 @@ import type { Point,Interval } from '~/shared/types/math/basic';
 import type { RenderContext2D } from '@engines/2d/core/core';
 import { BaseRenderer2D } from '@engines/2d/core/BaseRenderer2D';
 import type { SceneNode2D } from '@engines/2d/core/SceneNode2D';
+import type { HasOpacity } from '../animations';
 
 import * as d3 from 'd3';
 
-export class FunctionRenderer extends BaseRenderer2D<AbstractFunctionObject,any>{
+export class FunctionRenderer extends BaseRenderer2D<AbstractFunctionObject,HasOpacity>{
   public override get layerName(){
     return 'function';
   }
 
   public override render(
-    functions:SceneNode2D<AbstractFunctionObject,any>[],
+    functions:SceneNode2D<AbstractFunctionObject,HasOpacity>[],
     context:RenderContext2D,
   ){
     if(!this.m_group)return;

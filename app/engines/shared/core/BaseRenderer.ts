@@ -1,7 +1,6 @@
 import type { SceneNode } from './SceneNode';
 
 export abstract class BaseRenderer<TData,TStyle,TSurface,TContext>{
-  protected m_group:TSurface|null=null;
   public isMounted=false;
 
   public abstract get layerName():string;

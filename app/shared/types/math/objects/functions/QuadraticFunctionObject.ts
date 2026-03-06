@@ -1,7 +1,7 @@
-import { AbstractFunctionObject } from './AbstractFunctionObject';
+import { PolynominalFunctionObject } from './PolynomialFunctionObject';
 import type { Interval } from '@math/basic/';
 
-export class QuadraticFunctionObject extends AbstractFunctionObject{
+export class QuadraticFunctionObject extends PolynominalFunctionObject{
   private m_a:number;
   private m_b:number;
   private m_c:number;
@@ -13,7 +13,7 @@ export class QuadraticFunctionObject extends AbstractFunctionObject{
     samples:number,
     domain?:Interval
   ){
-    super(samples,domain);
+    super([c,b,a],samples,domain);
     this.m_a=a;
     this.m_b=b;
     this.m_c=c;

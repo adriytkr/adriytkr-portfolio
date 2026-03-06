@@ -2,6 +2,7 @@ import type { BaseAnimation } from '@engines/shared/core/BaseAnimation';
 import type { SceneNode } from '@engines/shared/core/SceneNode';
 import { Engine2D } from './Engine2D';
 import type { RenderContext2D } from './core';
+import type { CameraObject } from './CameraObject';
 
 export class GraphAPI2D{
   private m_engine:Engine2D|null=null;

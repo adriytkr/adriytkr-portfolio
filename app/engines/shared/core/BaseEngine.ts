@@ -63,7 +63,6 @@ export abstract class BaseEngine<TSurface,TContext,TCamera>{
     }
 
     if(this.m_needsUpdate){
-      // this.updateScalesFromCamera();
       this.updateScene();
       this.m_needsUpdate=false;
     }
@@ -80,24 +79,24 @@ export abstract class BaseEngine<TSurface,TContext,TCamera>{
     }else{
       this.m_nodes.push(object);
     }
-    this.m_needsUpdate=true;
+    this.requestUpdate();
   }
 
   protected abstract isCamera(object:any):object is TCamera;
 
   public setActiveCamera(camera:TCamera){
     this.m_activeCamera=camera;
-    this.m_needsUpdate=true;
+    this.requestUpdate();
   }
 
   public remove(node:SceneNode<any,any,TSurface,TContext>){
     this.m_nodes=this.m_nodes.filter(n=>node.id!==n.id);
-    this.m_needsUpdate=true;
+    this.requestUpdate();
   }
 
   public clear(){
     this.m_nodes=[];
-    this.m_needsUpdate=true;
+    this.requestUpdate();
   }
 
   public dispose(){

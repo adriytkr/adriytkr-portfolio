@@ -1,14 +1,14 @@
-import { BaseAnimation } from '~/engines/shared/core/BaseAnimation';
 import type { AnimationOptions } from '~/engines/shared/core/types';
-import type { SceneNode } from '~/engines/shared/core/SceneNode';
 import { DEFAULT_ANIMATION_OPTIONS } from './constants';
 import type { HasOpacity } from './types';
+import { BaseAnimation2D } from '@engines/2d/core/BaseAnimation2D';
+import type { SceneNode2D } from '@engines/2d/core/SceneNode2D';
 
-export class FadeOutAnimation<T> extends BaseAnimation{
-  private m_node:SceneNode<T,HasOpacity>;
+export class FadeOutAnimation<T> extends BaseAnimation2D{
+  private m_node:SceneNode2D<T,HasOpacity>;
 
   constructor(
-    node: SceneNode<T,HasOpacity>,
+    node: SceneNode2D<T,HasOpacity>,
     options:AnimationOptions=DEFAULT_ANIMATION_OPTIONS,
   ){
     super(options);

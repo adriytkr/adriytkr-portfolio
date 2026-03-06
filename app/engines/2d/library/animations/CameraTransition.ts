@@ -1,10 +1,10 @@
-import { BaseAnimation } from '~/engines/shared/core/BaseAnimation';
-import type { CameraObject } from '@math-objects';
+import type { CameraObject } from '@engines/2d/core/CameraObject';
 import type { AnimationOptions } from '~/engines/shared/core/types';
 import type { Interval } from '@math/basic/index';
 import { DEFAULT_ANIMATION_OPTIONS } from './constants';
+import { BaseAnimation2D } from '@engines/2d/core/BaseAnimation2D';
 
-export class CameraTransitionAnimation extends BaseAnimation{
+export class CameraTransitionAnimation extends BaseAnimation2D{
   public camera:CameraObject;
   public startDomain:Interval=[0,0];
   public startRange:Interval=[0,0];

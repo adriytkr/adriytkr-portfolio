@@ -1,7 +1,7 @@
-import { AbstractFunctionObject } from './AbstractFunctionObject';
+import { PolynominalFunctionObject } from './PolynomialFunctionObject';
 import type { Interval } from '@math/basic/';
 
-export class LinearFunctionObject extends AbstractFunctionObject{
+export class LinearFunctionObject extends PolynominalFunctionObject{
   private m_m:number;
   private m_b:number;
 
@@ -11,7 +11,7 @@ export class LinearFunctionObject extends AbstractFunctionObject{
     samples:number,
     domain?:Interval,
   ){
-    super(samples,domain);
+    super([yIntercept,slope],samples,domain);
     this.m_m=slope;
     this.m_b=yIntercept;
   }
