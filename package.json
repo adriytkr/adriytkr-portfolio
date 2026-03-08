@@ -2,7 +2,7 @@
   "name": "adriytkr-blog",
   "type": "module",
   "private": true,
-  "workspaces":[
+  "workspaces": [
     "packages/*"
   ],
   "scripts": {
@@ -13,6 +13,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@adriytkr/engine": "*",
+    "@adriytkr/renderer-pixi": "*",
+    "@adriytkr/std": "*",
     "@nuxt/content": "^3.12.0",
     "@nuxt/fonts": "^0.14.0",
     "@nuxtjs/i18n": "^10.2.3",
@@ -23,12 +26,10 @@
     "fs": "^0.0.1-security",
     "katex": "^0.16.33",
     "nuxt": "^4.3.1",
+    "pixi.js": "^8.16.0",
     "three": "^0.183.1",
     "vue": "^3.5.28",
-    "vue-router": "^4.6.4",
-    "@adriytkr/engine": "*",
-    "@adriytkr/std": "*",
-    "@adriytkr/renderer-d3": "*"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",

@@ -1,0 +1,14 @@
+{
+  "name": "@adriytkr/renderer-pixi",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@adriytkr/engine": "*",
+    "@adriytkr/std": "*",
+    "pixi.js": "^8.16.0"
+  }
+}

@@ -46,7 +46,7 @@ export class World{
     const stores=components
       .map(component=>this.m_stores.get(component.name))
       .filter((store):store is SparseSet<any>=>store!==undefined);
-    
+
     if(stores.length!==components.length)return[];
 
     const primaryStore=stores[0];

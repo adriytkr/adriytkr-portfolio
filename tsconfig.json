@@ -22,8 +22,8 @@
       "@adriytkr/std/*": ["packages/std/src/*.ts"],
       "@adriytkr/engine": ["packages/engine/src/index.ts"],
       "@adriytkr/engine/*": ["packages/engine/src/*.ts"],
-      "@adriytkr/renderer-d3": ["packages/renderer-d3/src/index.ts"],
-      "@adriytkr/renderer-d3/*": ["packages/renderer-d3/src/*.ts"]
+      "@adriytkr/renderer-pixi": ["packages/renderer-pixi/src/index.ts"],
+      "@adriytkr/renderer-pixi/*": ["packages/renderer-pixi/src/*.ts"]
     }
   }
 }
