@@ -7,10 +7,7 @@ export class Transform extends Component{
 
   public localPosition={x:0,y:0,z:0};
 
-  // public isDirty:boolean=true;
-
   public constructor(){
     super();
   }
 }
-

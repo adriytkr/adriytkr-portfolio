@@ -13,3 +13,5 @@ export * from './Alpha';
 export * from './Name';
 
 export * from './HiddenFlag';
+
+export * from './Renderable';

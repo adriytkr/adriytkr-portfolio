@@ -3,22 +3,13 @@ import { World } from '@adriytkr/engine';
 
 import { Camera2D } from '@adriytkr/std/2d/index';
 import {
+  Renderable,
+  RendererSystem,
   SystemManager,
   Transform,
 } from '@adriytkr/std';
 
-import {
-  MathFunction,
-  ParametricCurve,
-  LineStyle,
-  PixiRendererSystem,
-  FunctionRenderSystem,
-  ParametricCurveRenderSystem,
-  CircleStyle,
-  CircleGeometry,
-  Vector,
-  VectorStyle,
-} from '@adriytkr/math';
+import type { Point } from '@adriytkr/std';
 
 import * as PIXI from 'pixi.js';
 
@@ -32,6 +23,17 @@ onMounted(async()=>{
   canvas.height=canvas.clientHeight;
 
   const world=new World();
+  const systemManager=new SystemManager();
+
+  const renderer=await PIXI.autoDetectRenderer({
+    canvas:canvasRef.value,
+    width:canvas.width,
+    height:canvas.height,
+    resolution: window.devicePixelRatio,
+    antialias:true,
+    autoDensity:true,
+  });
+  systemManager.add(new RendererSystem(renderer));
 
   const camera=world.createEntity()
   world.addComponent(camera,new Camera2D(
@@ -42,53 +44,60 @@ onMounted(async()=>{
     canvas.height,
   ));
 
-  const parabola=world.createEntity();
-  world.addComponent(parabola,new Transform());
-  world.addComponent(parabola,new MathFunction(
-    x=>x**2,
-    [-5,5],
-  ));
-  world.addComponent(parabola,new LineStyle('yellow',1));
+  const polyline=world.createEntity();
+  world.addComponent(polyline,new Transform());
+  const polylineVisual=new Renderable();
+  polylineVisual.addCommand({
+    type:'polyline',
+    points:[
+      {x:0,y:0},
+      {x:2,y:0},
+      {x:2,y:3},
+    ],
+  });
+  world.addComponent(polyline,polylineVisual);
 
-  const parametricCurve=world.createEntity();
-  world.addComponent(parametricCurve,new Transform());
-  world.addComponent(parametricCurve,new ParametricCurve(
-    t=>1,
-    t=>t,
-    [-3,3],
-  ));
-  world.addComponent(parametricCurve,new LineStyle('red',1));
-
-  const circle=world.createEntity();
-  world.addComponent(circle,new Transform());
-  world.addComponent(circle,new CircleGeometry(1));
-  world.addComponent(circle,new CircleStyle('white','red',1));
-
-  const point=world.createEntity();
-  const t=world.addComponent(point,new Transform());
-  t.localPosition.x=1;
-  t.localPosition.y=1;
-  world.addComponent(point,new CircleGeometry(0.1));
-  world.addComponent(point,new CircleStyle('red','red',1));
+  const square=world.createEntity();
+  world.addComponent(square,new Transform());
+  const squareVisual=new Renderable();
+  squareVisual.addCommand({
+    type:'polygon',
+    vertices:[
+      {x:0,y:0},
+      {x:1,y:0},
+      {x:1,y:1},
+      {x:0,y:1},
+    ],
+  });
+  world.addComponent(square,squareVisual);
 
   const vector=world.createEntity();
   world.addComponent(vector,new Transform());
-  world.addComponent(vector,new Vector(1,1));
-  world.addComponent(vector,new VectorStyle('white','white'));
-
-  const renderer=await PIXI.autoDetectRenderer({
-    canvas:canvasRef.value,
-    width:canvas.width,
-    height:canvas.height,
-    resolution: window.devicePixelRatio,
-    antialias:true,
-    autoDensity:true,
+  const vectorFrom:Point={x:0,y:0};
+  const vectorTo:Point={x:3,y:2};
+  const size=0.3;
+  const vectorVisual=new Renderable();
+  vectorVisual.addCommand({
+    type:'polyline',
+    points:[
+      vectorFrom,
+      vectorTo,
+    ],
   });
-
-  const systemManager=new SystemManager();
-  systemManager.add(new FunctionRenderSystem());
-  systemManager.add(new ParametricCurveRenderSystem());
-  systemManager.add(new PixiRendererSystem(renderer));
+  const dx=vectorTo.x-vectorFrom.x;
+  const dy=vectorTo.y-vectorFrom.y;
+  const length=Math.sqrt(dx**2+dy**2);
+  const ux=dx/length;
+  const uy=dy/length;
+  const px=-uy*size;
+  const py=ux*size;
+  const base1={x:vectorTo.x-ux*size+px,y:vectorTo.y-uy*size+py};
+  const base2={x:vectorTo.x-ux*size-px,y:vectorTo.y-uy*size-py};
+  vectorVisual.addCommand({
+    type: 'polygon',
+    vertices: [vectorTo, base1, base2],
+  });
+  world.addComponent(vector,vectorVisual);
 
   let lastTime=performance.now();
   function loop(time:number){
