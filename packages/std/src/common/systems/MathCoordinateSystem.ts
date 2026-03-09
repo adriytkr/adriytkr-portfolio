@@ -1,5 +1,5 @@
-import { Transform,MathPosition,MathCanvas } from '@adriytkr/engine/components';
-import type { ISystem } from '@adriytkr/engine';
+import { Transform,MathPosition,MathCanvas } from '../components';
+import type { ISystem, World } from '@adriytkr/engine';
 
 export class MathCoordinateSystem implements ISystem{
   public update(world:World,delta:number):void{
@@ -11,8 +11,8 @@ export class MathCoordinateSystem implements ISystem{
 
       const canvas=world.getComponent(mathPosition.canvasEntity,MathCanvas)!;
 
-      transform.x=canvas.origin.x+(mathPosition.x*canvas.unitSize);
-      transform.y=canvas.origin.y+(mathPosition.y*canvas.unitSize);
+      transform.localPosition.x=canvas.origin.x+(mathPosition.x*canvas.unitSize);
+      transform.localPosition.y=canvas.origin.y+(mathPosition.y*canvas.unitSize);
     }
   }
 }
