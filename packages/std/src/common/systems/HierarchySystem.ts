@@ -8,13 +8,14 @@ export class HierarchySystem implements ISystem{
 
     for(const entity of entities){
       const hierarchy=world.getComponent(entity,Hierarchy)!;
+      hierarchy.children.clear();
 
       if(hierarchy.parent===null)continue;
 
-      if(hierarchy.parent){
-        const parentHierarchy=world.getComponent(hierarchy.parent,Hierarchy)!;
-        parentHierarchy.children.add(entity);
-      }
+      let parentHierarchy=world.getComponent(hierarchy.parent,Hierarchy);
+      if(!parentHierarchy)
+        parentHierarchy=world.addComponent(hierarchy.parent,new Hierarchy());
+      parentHierarchy.children.add(entity);
     }
   }
 }

@@ -14,6 +14,7 @@ export type DrawCommand=
 
 export class Renderable extends Component{
   public drawCommands:DrawCommand[]=[];
+  public opacity:number=1;
 
   public constructor(){
     super();

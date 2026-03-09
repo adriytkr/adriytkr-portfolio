@@ -10,6 +10,8 @@ export class RendererSystem implements ISystem{
   public constructor(private renderer:PIXI.Renderer){}
 
   public update(world:World,delta:number):void{
+    this.root.removeChildren();
+
     const entities=world.query(Transform,Renderable);
     const cameraEntity=world.query(Camera2D)[0]!;
 
@@ -24,6 +26,7 @@ export class RendererSystem implements ISystem{
 
       for(const command of renderable.drawCommands){
         const g=new PIXI.Graphics();
+        g.alpha=renderable.opacity;
         switch(command.type){
           case 'polyline':
             g.setStrokeStyle({
@@ -79,16 +82,23 @@ export class RendererSystem implements ISystem{
     });
   }
 
-  private applyTransform(point:{x:number;y:number},transform:Transform,camera:Camera2D){
-    let x=point.x*transform.scale.x;
-    let y=point.y*transform.scale.y;
+  private applyTransform(point:{x:number;y:number}, transform:Transform, camera:Camera2D){
+    let x=point.x*transform.worldScale.x;
+    let y=point.y*transform.worldScale.y;
 
-    x+=transform.worldPosition.x;
-    y+=transform.worldPosition.y;
+    const theta=2*Math.atan2(transform.worldRotation.z,transform.worldRotation.w);
+    const cosR=Math.cos(theta);
+    const sinR=Math.sin(theta);
+
+    const xRot=x*cosR-y*sinR;
+    const yRot=x*sinR+y*cosR;
+
+    x=xRot+transform.worldPosition.x;
+    y=yRot+transform.worldPosition.y;
 
     const screenX=(x-camera.x)*camera.zoom+camera.width/2;
     const screenY=(camera.y-y)*camera.zoom+camera.height/2;
 
-    return{x:screenX,y:screenY};
+    return { x: screenX, y: screenY };
   }
 }

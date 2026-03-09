@@ -3,10 +3,15 @@ import { World } from '@adriytkr/engine';
 
 import { Camera2D } from '@adriytkr/std/2d/index';
 import {
+  AnimationGroup,
+  AnimationSystem,
+  Hierarchy,
+  HierarchySystem,
   Renderable,
   RendererSystem,
   SystemManager,
   Transform,
+  TransformSystem,
 } from '@adriytkr/std';
 
 import type { Point } from '@adriytkr/std';
@@ -33,6 +38,10 @@ onMounted(async()=>{
     antialias:true,
     autoDensity:true,
   });
+
+  systemManager.add(new AnimationSystem());
+  // systemManager.add(new HierarchySystem());
+  systemManager.add(new TransformSystem());
   systemManager.add(new RendererSystem(renderer));
 
   const camera=world.createEntity()
@@ -44,21 +53,8 @@ onMounted(async()=>{
     canvas.height,
   ));
 
-  const polyline=world.createEntity();
-  world.addComponent(polyline,new Transform());
-  const polylineVisual=new Renderable();
-  polylineVisual.addCommand({
-    type:'polyline',
-    points:[
-      {x:0,y:0},
-      {x:2,y:0},
-      {x:2,y:3},
-    ],
-  });
-  world.addComponent(polyline,polylineVisual);
-
   const square=world.createEntity();
-  world.addComponent(square,new Transform());
+  const squareTransform=world.addComponent(square,new Transform());
   const squareVisual=new Renderable();
   squareVisual.addCommand({
     type:'polygon',
@@ -84,6 +80,11 @@ onMounted(async()=>{
       vectorTo,
     ],
   });
+
+  world.addComponent(vector,new Hierarchy(square));
+  const x=world.addComponent(square,new Hierarchy());
+  x.children.add(vector);
+
   const dx=vectorTo.x-vectorFrom.x;
   const dy=vectorTo.y-vectorFrom.y;
   const length=Math.sqrt(dx**2+dy**2);
@@ -98,6 +99,31 @@ onMounted(async()=>{
     vertices: [vectorTo, base1, base2],
   });
   world.addComponent(vector,vectorVisual);
+
+  const easeOutQuad=(t:number)=>t*(2-t);
+
+  // const squareAnimationGroup=world.addComponent(square,new AnimationGroup());
+  // squareAnimationGroup.addTrack({
+  //   duration:1,
+  //   elapsed:0,
+  //   onUpdate(alpha:number){
+  //     const t=easeOutQuad(alpha);
+
+  //     squareTransform.localPosition.x=t;
+  //     squareTransform.localPosition.y=t;
+
+  //     const rad=Math.PI;
+  //     const theta=rad*t;
+  //     squareTransform.localRotation.z=Math.sin(theta/2);
+  //     squareTransform.localRotation.w=Math.cos(theta/2);
+  //     squareTransform.localRotation.x=0;
+  //     squareTransform.localRotation.y=0;
+  //   },
+  // });
+  squareTransform.localRotation.z=Math.sin(Math.PI/2);
+  squareTransform.localRotation.w=Math.cos(Math.PI/2);
+  squareTransform.localRotation.x=0;
+  squareTransform.localRotation.y=0;
 
   let lastTime=performance.now();
   function loop(time:number){

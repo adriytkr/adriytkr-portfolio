@@ -1,3 +1,6 @@
 export * from './common/components/';
 export * from './common/systems/';
-export * from './common/animations/';
+
+export * from './2d';
+
+// export * from './utils';

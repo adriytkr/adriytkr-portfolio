@@ -1,8 +1,19 @@
 import { Component } from '@adriytkr/engine';
-import type { BaseAnimation } from '../animations/BaseAnimation';
+
+export type AnimationTrack={
+  duration:number;
+  elapsed:number;
+  onUpdate(alpha:number):void;
+};
 
 export class AnimationGroup extends Component{
-  public constructor(public animations:BaseAnimation[]=[]){
+  public tracks:AnimationTrack[]=[];
+
+  public constructor(){
     super();
+  }
+
+  public addTrack(track:AnimationTrack):void{
+    this.tracks.push(track);
   }
 }
