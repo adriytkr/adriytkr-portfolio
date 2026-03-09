@@ -1,109 +1,107 @@
 <script setup lang="ts">
 import { World } from '@adriytkr/engine';
+
+import { Camera2D } from '@adriytkr/std/2d/index';
 import {
-  Hierarchy,
-  Transform,
-  HierarchySystem,
-  TransformSystem,
-  AnimationSystem,
-  AnimationGroup,
-  Alpha,
   SystemManager,
-  MathCanvas,
-  MathPosition,
-  Camera2D,
-  MathPoint,
-  PointRenderSystem,
-  Renderable,
-  PixiRendererSystem,
-  ActiveCameraTag,
-  MathVector,
-  VectorRenderSystem,
-  MathFunction,
-  FunctionRenderSystem,
+  Transform,
 } from '@adriytkr/std';
+
+import {
+  MathFunction,
+  ParametricCurve,
+  LineStyle,
+  PixiRendererSystem,
+  FunctionRenderSystem,
+  ParametricCurveRenderSystem,
+  CircleStyle,
+  CircleGeometry,
+  Vector,
+  VectorStyle,
+} from '@adriytkr/math';
 
 import * as PIXI from 'pixi.js';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
-const world=new World();
-const systemManager=new SystemManager();
-
-let lastTime=0;
-let frameId:number|null=null;
-let renderer:PIXI.Renderer|null=null;
-
-function gameLoop(currentTime:number){
-  const delta=(currentTime-lastTime)/1000;
-  lastTime=currentTime;
-
-  systemManager.update(world,delta);
-
-  frameId=requestAnimationFrame(gameLoop);
-}
 
 onMounted(async()=>{
   if(!canvasRef.value)return;
 
-  renderer=await PIXI.autoDetectRenderer({
-    view:canvasRef.value,
-    width:canvasRef.value.scrollWidth,
-    height:canvasRef.value.scrollHeight,
-    resolution:window.devicePixelRatio||1,
-    autoDensity:true,
-    backgroundColor:0xeeeeee,
-  }) as PIXI.Renderer;
+  const canvas=canvasRef.value;
+  canvas.width=canvas.clientWidth;
+  canvas.height=canvas.clientHeight;
 
-  systemManager.add(new HierarchySystem());
-  systemManager.add(new TransformSystem());
-  systemManager.add(new AnimationSystem());
-  systemManager.add(new PointRenderSystem());
-  systemManager.add(new VectorRenderSystem());
-  systemManager.add(new FunctionRenderSystem());
-  systemManager.add(new PixiRendererSystem(renderer));
+  const world=new World();
 
-  const canvas=world.createEntity();
-  world.addComponent(canvas,new MathCanvas(30,{x:0,y:0}));
-
-  const point=world.createEntity();
-  world.addComponent(point,new Transform());
-  world.addComponent(point,new Hierarchy());
-  world.addComponent(point,new MathPosition(0,0,canvas));
-  world.addComponent(point,new MathPoint(10));
-  world.addComponent(point,new Renderable(new PIXI.Graphics()));
-
-  const vector=world.createEntity();
-  world.addComponent(vector,new Transform());
-  world.addComponent(vector,new Hierarchy());
-  world.addComponent(vector,new MathPosition(0,0,canvas));
-  world.addComponent(vector,new MathVector(3,0));
-  world.addComponent(vector,new Renderable(new PIXI.Graphics()));
-
-  const parabola=world.createEntity();
-  world.addComponent(parabola,new Transform());
-  world.addComponent(parabola,new Hierarchy());
-  world.addComponent(parabola,new MathFunction(
-    x=>x,
-    [-Infinity,Infinity],
-    canvas,
-  ));
-  world.addComponent(parabola,new Renderable(new PIXI.Graphics()));
-
-  const camera=world.createEntity();
+  const camera=world.createEntity()
   world.addComponent(camera,new Camera2D(
     0,
     0,
-    canvasRef.value.scrollWidth,
-    canvasRef.value.scrollHeight,
+    50,
+    canvas.width,
+    canvas.height,
   ));
-  world.addComponent(camera,new ActiveCameraTag());
 
-  frameId=requestAnimationFrame(gameLoop);
+  const parabola=world.createEntity();
+  world.addComponent(parabola,new Transform());
+  world.addComponent(parabola,new MathFunction(
+    x=>x**2,
+    [-5,5],
+  ));
+  world.addComponent(parabola,new LineStyle('yellow',1));
+
+  const parametricCurve=world.createEntity();
+  world.addComponent(parametricCurve,new Transform());
+  world.addComponent(parametricCurve,new ParametricCurve(
+    t=>1,
+    t=>t,
+    [-3,3],
+  ));
+  world.addComponent(parametricCurve,new LineStyle('red',1));
+
+  const circle=world.createEntity();
+  world.addComponent(circle,new Transform());
+  world.addComponent(circle,new CircleGeometry(1));
+  world.addComponent(circle,new CircleStyle('white','red',1));
+
+  const point=world.createEntity();
+  const t=world.addComponent(point,new Transform());
+  t.localPosition.x=1;
+  t.localPosition.y=1;
+  world.addComponent(point,new CircleGeometry(0.1));
+  world.addComponent(point,new CircleStyle('red','red',1));
+
+  const vector=world.createEntity();
+  world.addComponent(vector,new Transform());
+  world.addComponent(vector,new Vector(1,1));
+  world.addComponent(vector,new VectorStyle('white','white'));
+
+  const renderer=await PIXI.autoDetectRenderer({
+    canvas:canvasRef.value,
+    width:canvas.width,
+    height:canvas.height,
+    resolution: window.devicePixelRatio,
+    antialias:true,
+    autoDensity:true,
+  });
+
+  const systemManager=new SystemManager();
+  systemManager.add(new FunctionRenderSystem());
+  systemManager.add(new ParametricCurveRenderSystem());
+  systemManager.add(new PixiRendererSystem(renderer));
+
+  let lastTime=performance.now();
+  function loop(time:number){
+    const delta=(time-lastTime)/1000;
+    lastTime=time;
+    systemManager.update(world,delta);
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
 });
 
-onUnmounted(()=>{
-  if(frameId)cancelAnimationFrame(frameId);
-});
+onUnmounted(()=>{});
 </script>
 
 <template>
@@ -116,5 +114,6 @@ canvas{
   width:100%;
   height:500px;
   border:1px solid black;
+  display:block;
 }
 </style>

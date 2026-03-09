@@ -1,9 +1,9 @@
 import { Component } from '@adriytkr/engine';
 
-export class MathVector extends Component{
+export class LineStyle extends Component{
   public constructor(
-    public toX:number,
-    public toY:number,
+    public stroke:string,
+    public width:number,
   ){
     super();
   }

@@ -2,9 +2,9 @@ import { Component } from '@adriytkr/engine';
 
 import * as PIXI from 'pixi.js';
 
-export class Renderable extends Component{
+export class PixiGraphics extends Component{
   public constructor(
-    public container:PIXI.Container,
+    public graphics:PIXI.Graphics,
   ){
     super();
   }

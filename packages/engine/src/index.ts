@@ -4,5 +4,4 @@ export * from './System';
 
 export * from './World';
 
-// export * from './Scene';
 export * from './SparseSet';

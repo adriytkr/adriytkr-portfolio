@@ -23,7 +23,6 @@ export class QuadraticFunctionObject extends PolynominalFunctionObject{
     this.m_a=a;
     this.m_b=b;
     this.m_c=c;
-    this.m_isDirty=true;
   }
 
   public override evaluate=(x:number)=>

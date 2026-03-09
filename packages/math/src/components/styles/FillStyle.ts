@@ -1,11 +1,10 @@
 import { Component } from '@adriytkr/engine';
 
-export class Camera2D extends Component{
+export class FillStyle extends Component{
   public constructor(
-    public x:number,
-    public y:number,
+    public stroke:string,
+    public fill:string,
     public width:number,
-    public height:number,
   ){
     super();
   }
