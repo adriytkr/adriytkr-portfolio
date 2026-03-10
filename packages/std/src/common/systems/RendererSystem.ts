@@ -31,7 +31,7 @@ export class RendererSystem implements ISystem{
           case 'polyline':
             g.setStrokeStyle({
               width:1,
-              color:0xff0000,
+              color:command.style.color,
             });
 
             if(command.points.length>0){
@@ -51,10 +51,10 @@ export class RendererSystem implements ISystem{
           case 'polygon':
             g.setStrokeStyle({
               width:1,
-              color:0xff0000,
+              color:command.style.stroke,
             });
             g.setFillStyle({
-              color:0xffffff,
+              color:command.style.fill,
             });
 
             if(command.vertices.length>0){

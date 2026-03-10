@@ -9,7 +9,7 @@ export class AnimationSystem implements ISystem{
     for(const entity of entities){
       const animationGroup=world.getComponent(entity,AnimationGroup)!;
 
-      for(let i=0;i<animationGroup.tracks.length;i++){
+      for(let i=animationGroup.tracks.length-1;i>=0;i--){
         const animation=animationGroup.tracks[i]!;
         animation.elapsed+=delta;
         const alpha=Math.min(animation.elapsed/animation.duration,1);

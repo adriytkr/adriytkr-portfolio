@@ -1,24 +1,46 @@
 <script setup lang="ts">
 import { World } from '@adriytkr/engine';
+import type { Entity } from '@adriytkr/engine';
 
 import { Camera2D } from '@adriytkr/std/2d/index';
 import {
   AnimationGroup,
   AnimationSystem,
+  create2DCamera,
+  createFunc,
+  createGrid,
+  createCircle,
+  createPolygon,
+  createRectangle,
+  createSquare,
+  createStandardAxes,
+  createVector,
   Hierarchy,
-  HierarchySystem,
   Renderable,
   RendererSystem,
   SystemManager,
   Transform,
   TransformSystem,
+  createPentagon,
 } from '@adriytkr/std';
-
-import type { Point } from '@adriytkr/std';
+import { shiftAnimation } from '@adriytkr/std';
 
 import * as PIXI from 'pixi.js';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
+
+let world:World;
+let systemManager:SystemManager;
+let camera:{
+  entity:Entity,
+  camera2D:Camera2D,
+};
+
+let square:{
+  entity:Entity,
+  transform:Transform,
+  renderable:Renderable,
+};
 
 onMounted(async()=>{
   if(!canvasRef.value)return;
@@ -27,8 +49,11 @@ onMounted(async()=>{
   canvas.width=canvas.clientWidth;
   canvas.height=canvas.clientHeight;
 
-  const world=new World();
-  const systemManager=new SystemManager();
+  world=new World();
+  systemManager=new SystemManager();
+
+  systemManager.add(new AnimationSystem());
+  systemManager.add(new TransformSystem());
 
   const renderer=await PIXI.autoDetectRenderer({
     canvas:canvasRef.value,
@@ -39,91 +64,79 @@ onMounted(async()=>{
     autoDensity:true,
   });
 
-  systemManager.add(new AnimationSystem());
-  // systemManager.add(new HierarchySystem());
-  systemManager.add(new TransformSystem());
   systemManager.add(new RendererSystem(renderer));
 
-  const camera=world.createEntity()
-  world.addComponent(camera,new Camera2D(
-    0,
-    0,
-    50,
-    canvas.width,
-    canvas.height,
-  ));
+  camera=create2DCamera(
+    world,
+    {
+      position:{x:0,y:0,z:0},
+      zoom:50,
+      size:{
+        width:canvas.width,
+        height:canvas.height,
+      },
+    },
+    {},
+  );
 
-  const square=world.createEntity();
-  const squareTransform=world.addComponent(square,new Transform());
-  const squareVisual=new Renderable();
-  squareVisual.addCommand({
-    type:'polygon',
-    vertices:[
-      {x:0,y:0},
-      {x:1,y:0},
-      {x:1,y:1},
-      {x:0,y:1},
-    ],
-  });
-  world.addComponent(square,squareVisual);
+  square=createSquare(
+    world,
+    {
+      position:{x:0,y:0,z:0},
+      size:1,
+    },
+  );
 
-  const vector=world.createEntity();
-  world.addComponent(vector,new Transform());
-  const vectorFrom:Point={x:0,y:0};
-  const vectorTo:Point={x:3,y:2};
-  const size=0.3;
-  const vectorVisual=new Renderable();
-  vectorVisual.addCommand({
-    type:'polyline',
-    points:[
-      vectorFrom,
-      vectorTo,
-    ],
-  });
+  const rectangle=createRectangle(
+    world,
+    {
+      position:{x:-3,y:-1,z:0},
+      width:2,
+      height:1,
+    },
+  );
 
-  world.addComponent(vector,new Hierarchy(square));
-  const x=world.addComponent(square,new Hierarchy());
-  x.children.add(vector);
+  const pentagon=createPentagon(
+    world,
+    {
+      position:{x:0,y:0,z:0},
+      sideLength:3,
+    },
+  );
 
-  const dx=vectorTo.x-vectorFrom.x;
-  const dy=vectorTo.y-vectorFrom.y;
-  const length=Math.sqrt(dx**2+dy**2);
-  const ux=dx/length;
-  const uy=dy/length;
-  const px=-uy*size;
-  const py=ux*size;
-  const base1={x:vectorTo.x-ux*size+px,y:vectorTo.y-uy*size+py};
-  const base2={x:vectorTo.x-ux*size-px,y:vectorTo.y-uy*size-py};
-  vectorVisual.addCommand({
-    type: 'polygon',
-    vertices: [vectorTo, base1, base2],
-  });
-  world.addComponent(vector,vectorVisual);
+  const vector=createVector(
+    world,
+    {
+      from:{x:0,y:0,z:0},
+      to:{x:2,y:2,z:0},
+    },
+    {
+      color:'blue',
+    },
+  );
 
-  const easeOutQuad=(t:number)=>t*(2-t);
+  world.addComponent(vector.entity,new Hierarchy(square.entity));
+  const x=world.addComponent(square.entity,new Hierarchy());
+  x.children.add(vector.entity);
 
-  // const squareAnimationGroup=world.addComponent(square,new AnimationGroup());
-  // squareAnimationGroup.addTrack({
-  //   duration:1,
-  //   elapsed:0,
-  //   onUpdate(alpha:number){
-  //     const t=easeOutQuad(alpha);
+  const func=createFunc(
+    world,
+    {
+      fn:x=>x**2,
+      domain:[-3,3],
+      samples:100,
+    },
+  );
 
-  //     squareTransform.localPosition.x=t;
-  //     squareTransform.localPosition.y=t;
+  const axes=createStandardAxes(
+    world,
+    {},
+  );
 
-  //     const rad=Math.PI;
-  //     const theta=rad*t;
-  //     squareTransform.localRotation.z=Math.sin(theta/2);
-  //     squareTransform.localRotation.w=Math.cos(theta/2);
-  //     squareTransform.localRotation.x=0;
-  //     squareTransform.localRotation.y=0;
-  //   },
-  // });
-  squareTransform.localRotation.z=Math.sin(Math.PI/2);
-  squareTransform.localRotation.w=Math.cos(Math.PI/2);
-  squareTransform.localRotation.x=0;
-  squareTransform.localRotation.y=0;
+  const grid=createGrid(
+    world,
+    {},
+  );
 
   let lastTime=performance.now();
   function loop(time:number){
@@ -134,14 +147,67 @@ onMounted(async()=>{
   }
 
   requestAnimationFrame(loop);
+
+  canvas.addEventListener('wheel',handleMouseScroll);
+  canvas.addEventListener('mousedown',handleMouseDown);
+  canvas.addEventListener('mouseup',handleMouseUp);
+  canvas.addEventListener('mousemove',handleMouseMove);
 });
 
-onUnmounted(()=>{});
+function animate(){
+  const squareAnimationGroup=world.addComponent(square.entity,new AnimationGroup());
+
+  squareAnimationGroup.addTrack(shiftAnimation(
+    2,
+    square.transform,
+    {x:2,y:2,z:0},
+  ));
+}
+
+let isDragging=false;
+let lastMouse={x:0,y:0};
+
+function handleMouseScroll(e:WheelEvent){
+  e.preventDefault();
+  const zoomFactor=1.1;
+  if(e.deltaY<0)camera.camera2D.zoom*=zoomFactor;
+  else camera.camera2D.zoom/=zoomFactor;
+}
+
+function handleMouseDown(e:MouseEvent){
+  isDragging=true;
+  lastMouse={x:e.clientX,y:e.clientY};
+}
+
+function handleMouseUp(){
+  isDragging=false
+}
+
+function handleMouseMove(e:MouseEvent){
+  if(!isDragging)return;
+  const dx=(e.clientX-lastMouse.x)/camera.camera2D.zoom;
+  const dy=(e.clientY-lastMouse.y)/camera.camera2D.zoom;
+  camera.camera2D.x-=dx;
+  camera.camera2D.y+=dy;
+  lastMouse={x:e.clientX,y:e.clientY};
+}
+
+onUnmounted(()=>{
+  if(!canvasRef.value)return;
+
+  const canvas=canvasRef.value;
+
+  canvas.removeEventListener('wheel',handleMouseScroll);
+  canvas.removeEventListener('mousedown',handleMouseDown);
+  canvas.removeEventListener('mouseup',handleMouseUp);
+  canvas.removeEventListener('mousemove',handleMouseMove);
+});
 </script>
 
 <template>
   <h1>Hello, World!</h1>
   <canvas ref="canvasRef"></canvas>
+  <button @click="animate">Animate</button>
 </template>
 
 <style scoped>

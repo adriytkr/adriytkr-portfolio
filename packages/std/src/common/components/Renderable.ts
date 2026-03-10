@@ -1,16 +1,22 @@
 import { Component } from '@adriytkr/engine';
 
-export type Point={
-  x:number,
-  y:number,
+import type { Point } from '../../types';
+
+export type PolylineCommand={
+  type:'polyline';
+  points:Point[];
+  style:{color:string};
+};
+
+export type PolyconCommand={
+  type:'polygon';
+  vertices:Point[];
+  style:{stroke:string,fill:string};
 };
 
 export type DrawCommand=
-  {type:'polyline',points:Point[]}|
-  {type:'polygon',vertices:Point[]}|
-  {type:'line',from:Point,to:Point}|
-  {type:'triangle',vertices:[Point,Point,Point]}|
-  {type:'circle',center:Point,radius:number};
+  PolylineCommand|
+  PolyconCommand;
 
 export class Renderable extends Component{
   public drawCommands:DrawCommand[]=[];
@@ -20,7 +26,7 @@ export class Renderable extends Component{
     super();
   }
 
-  public addCommand(command:DrawCommand):void{
+  public addDrawCommand(command:DrawCommand):void{
     this.drawCommands.push(command);
   }
 

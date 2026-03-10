@@ -3,4 +3,5 @@ export * from './common/systems/';
 
 export * from './2d';
 
-// export * from './utils';
+export * from './utils';
+export * from './types';

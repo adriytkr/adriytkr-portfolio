@@ -1,9 +1,10 @@
 import { Component } from '@adriytkr/engine';
+import type { updateAnimation } from '../../utils';
 
 export type AnimationTrack={
   duration:number;
   elapsed:number;
-  onUpdate(alpha:number):void;
+  onUpdate:updateAnimation,
 };
 
 export class AnimationGroup extends Component{
