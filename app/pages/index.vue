@@ -5,37 +5,13 @@ import type { Entity } from '@adriytkr/engine';
 import { Camera2D } from '@adriytkr/std/2d/index';
 
 import {
-  AnimationGroup,
-  AnimationSystem,
-  Hierarchy,
-  PolylineGeometry,
-  Renderable,
-  Transform,
   TransformSystem,
   create2DCamera,
-  rotateAnimationTrack,
-  shiftAnimationTrack,
   RendererSystem,
-  FunctionObject,
-  FunctionGeometrySystem,
-  ParametricFunctionObject,
-  ParametricFunctionGeometrySystem,
-  PolygonGeometry,
-  PolygonObject,
-  PolygonSystem,
-  RegularPolygonObject,
-  RegularPolygonSystem,
-  VectorGeometrySystem,
-  VectorObject,
-  ArcGeometry,
-  GridObject,
-  GridGeometrySystem,
+  Transform,
+  Hierarchy,
+  Renderable,
 } from '@adriytkr/std';
-
-import {
-  createGrid,
-  createStandardAxes,
-} from '@adriytkr/math';
 
 import { PixiRendererAdapter } from '@adriytkr/pixi-renderer-2d';
 
@@ -60,15 +36,7 @@ onMounted(async()=>{
   world=new World();
   systemManager=new SystemManager();
 
-  systemManager.add(new AnimationSystem());
   systemManager.add(new TransformSystem());
-
-  systemManager.add(new PolygonSystem());
-  systemManager.add(new RegularPolygonSystem());
-  systemManager.add(new FunctionGeometrySystem());
-  systemManager.add(new VectorGeometrySystem());
-  systemManager.add(new GridGeometrySystem());
-  systemManager.add(new ParametricFunctionGeometrySystem());
 
   const renderer=await PIXI.autoDetectRenderer({
     canvas:canvasRef.value,
@@ -94,60 +62,27 @@ onMounted(async()=>{
     },
   );
 
-  const func=world.createEntity();
-  world.addComponent(func,new FunctionObject(
-    x=>x**2,
-    200,
-    [-3,3],
-  ));
-  world.addComponent(func,new Transform());
-  world.addComponent(func,new Hierarchy());
-
-  const func2=world.createEntity();
-  world.addComponent(func2,new ParametricFunctionObject(
-    t=>t**3,
-    t=>t*2,
-    [-3,3],
-    200,
-  ));
-  world.addComponent(func2,new Transform());
-  world.addComponent(func2,new Hierarchy());
-
-  const square=world.createEntity();
-  world.addComponent(square,new Transform());
-  world.addComponent(square,new Hierarchy());
-  world.addComponent(square,new RegularPolygonObject(6,1));
-
-  const vector=world.createEntity();
-  world.addComponent(square,new Transform());
-  world.addComponent(square,new Hierarchy());
-  world.addComponent(square,new VectorObject({x:1,y:3,z:0}));
-
-  const circle=world.createEntity();
-  world.addComponent(circle,new Transform());
-  world.addComponent(circle,new Hierarchy());
-  world.addComponent(circle,new ArcGeometry({
-    radius:2,
-    startAngle:0,
-    endAngle:Math.PI/2,
-  }));
-
-  const grid=world.createEntity();
-  world.addComponent(circle,new Transform());
-  world.addComponent(circle,new Hierarchy());
-  world.addComponent(circle,new GridObject(10,10,1));
-  // world.addComponent(square,new PolygonObject([
-  //   {x:0,y:0,z:0},
-  //   {x:1,y:0,z:0},
-  //   {x:1,y:1,z:0},
-  //   {x:0,y:1,z:0},
-  // ]));
-  // world.addComponent(square,new PolygonGeometry([
-  //   {x:0,y:0,z:0},
-  //   {x:1,y:0,z:0},
-  //   {x:1,y:1,z:0},
-  //   {x:0,y:1,z:0},
-  // ]));
+  const lailah=world.createEntity();
+  const transform=world.addComponent(lailah,new Transform());
+  world.addComponent(lailah,new Hierarchy());
+  const renderable=new Renderable();
+  renderable.primitives.push({
+    topology:'polyline',
+    geometry:{
+      points:[
+        {x:0,y:0,z:0},
+        {x:1,y:0,z:0},
+        {x:1,y:1,z:0},
+        {x:2,y:1,z:0},
+      ],
+    },
+    style:{
+      stroke:'red',
+      strokeWidth:1,
+    },
+    transform,
+  });
+  world.addComponent(lailah,renderable);
 
   let lastTime=performance.now();
   function loop(time:number){

@@ -3,47 +3,47 @@ import { ArcGeometry, Camera2D, PolygonGeometry, PolylineGeometry, Transform } f
 import type { Geometry, IRendererAdapter } from '@adriytkr/std';
 
 import * as PIXI from 'pixi.js';
+import type { CommandBuffer, DrawCommand } from '~~/packages/std/src/common/systems/CommandBuffer';
 
-export type GeometryHandler=(geometry:any,transform:Transform,camera:Camera2D)=>void;
+export type CommandHandler=(buffer:DrawCommand<any,any,any>,camera:Camera2D)=>void;
 
 export class PixiRendererAdapter implements IRendererAdapter{
   public root:PIXI.Container=new PIXI.Container();
-  private handlers=new Map<Geometry,GeometryHandler>();
+  private handlers=new Map<string,CommandHandler>();
 
   public constructor(private renderer:PIXI.Renderer){
-    this.handlers.set(PolylineGeometry,this.drawPolyline);
-    this.handlers.set(PolygonGeometry,this.drawPolygon);
-    this.handlers.set(ArcGeometry,this.drawArc);
+    this.handlers.set('polyline',this.drawPolyline);
+    // this.handlers.set(PolygonGeometry,this.drawPolygon);
+    // this.handlers.set(ArcGeometry,this.drawArc);
   }
 
-  public draw(geometry:Geometry,transform:Transform,camera:Camera2D):void{
-    const handler=this.handlers.get(geometry.constructor);
-
-    if(handler===undefined)
-      throw Error('unsupported geometry');
-
-    handler.call(this,geometry,transform,camera);
+  public execute(buffer:CommandBuffer<any>,camera:Camera2D):void{
+    for(const command of buffer.commands){
+      const handler=this.handlers.get(command.topology);
+      if(!handler)continue;
+      handler.call(this,command,camera);
+    }
   }
 
   private drawPolyline(
-    geometry:PolylineGeometry,
-    transform:Transform,
+    buffer:DrawCommand<any,any,any>,
     camera:Camera2D,
   ):void{
-    if(geometry.config.points.length===0)return;
+    const {geometry,style,transform}=buffer;
+    if(geometry.points.length===0)return;
 
     const graphics=new PIXI.Graphics();
 
     graphics.setStrokeStyle({
-      width:geometry.style.strokeWidth,
-      color:geometry.style.stroke,
+      width:style.strokeWidth,
+      color:style.stroke,
     });
 
-    const first=this.applyTransform(geometry.config.points[0]!,transform,camera);
+    const first=this.applyTransform(geometry.points[0]!,transform,camera);
     graphics.moveTo(first.x,first.y);
 
-    for(let i=1;i<geometry.config.points.length;i++){
-      const p=this.applyTransform(geometry.config.points[i]!,transform,camera);
+    for(let i=1;i<geometry.points.length;i++){
+      const p=this.applyTransform(geometry.points[i]!,transform,camera);
       graphics.lineTo(p.x,p.y);
     }
 
@@ -52,70 +52,70 @@ export class PixiRendererAdapter implements IRendererAdapter{
     this.root.addChild(graphics);
   }
 
-  private drawPolygon(
-    geometry:PolygonGeometry,
-    transform:Transform,
-    camera:Camera2D,
-  ):void{
-    if(geometry.config.vertices.length===0)return;
+  // private drawPolygon(
+  //   geometry:PolygonGeometry,
+  //   transform:Transform,
+  //   camera:Camera2D,
+  // ):void{
+  //   if(geometry.config.vertices.length===0)return;
 
-    const graphics=new PIXI.Graphics();
+  //   const graphics=new PIXI.Graphics();
 
-    graphics.setStrokeStyle({
-      width:geometry.style.strokeWidth,
-      color:geometry.style.stroke,
-    });
-    graphics.setFillStyle({
-      color:geometry.style.fill,
-    });
+  //   graphics.setStrokeStyle({
+  //     width:geometry.style.strokeWidth,
+  //     color:geometry.style.stroke,
+  //   });
+  //   graphics.setFillStyle({
+  //     color:geometry.style.fill,
+  //   });
 
-    const first=this.applyTransform(geometry.config.vertices[0]!,transform,camera);
-    graphics.moveTo(first.x,first.y);
+  //   const first=this.applyTransform(geometry.config.vertices[0]!,transform,camera);
+  //   graphics.moveTo(first.x,first.y);
 
-    for(let i=1;i<geometry.config.vertices.length;i++){
-      const p=this.applyTransform(geometry.config.vertices[i]!,transform,camera);
-      graphics.lineTo(p.x,p.y);
-    }
+  //   for(let i=1;i<geometry.config.vertices.length;i++){
+  //     const p=this.applyTransform(geometry.config.vertices[i]!,transform,camera);
+  //     graphics.lineTo(p.x,p.y);
+  //   }
 
-    graphics.closePath();
-    graphics.fill();
-    graphics.stroke();
+  //   graphics.closePath();
+  //   graphics.fill();
+  //   graphics.stroke();
 
-    this.root.addChild(graphics);
-  }
+  //   this.root.addChild(graphics);
+  // }
 
-  private drawArc(
-    geometry:ArcGeometry,
-    transform:Transform,
-    camera:Camera2D,
-  ):void{
-    const graphics=new PIXI.Graphics();
+  // private drawArc(
+  //   geometry:ArcGeometry,
+  //   transform:Transform,
+  //   camera:Camera2D,
+  // ):void{
+  //   const graphics=new PIXI.Graphics();
 
-    graphics.setStrokeStyle({
-      width:geometry.style.strokeWidth,
-      color:geometry.style.stroke,
-    });
-    graphics.setFillStyle({
-      color:geometry.style.fill,
-    });
+  //   graphics.setStrokeStyle({
+  //     width:geometry.style.strokeWidth,
+  //     color:geometry.style.stroke,
+  //   });
+  //   graphics.setFillStyle({
+  //     color:geometry.style.fill,
+  //   });
 
-    const center=this.applyTransform(transform.localPosition,transform,camera);
-    const worldScale=Math.max(transform.worldScale.x,transform.worldScale.y);
-    const screenRadius=geometry.config.radius*worldScale*camera.zoom;
+  //   const center=this.applyTransform(transform.localPosition,transform,camera);
+  //   const worldScale=Math.max(transform.worldScale.x,transform.worldScale.y);
+  //   const screenRadius=geometry.config.radius*worldScale*camera.zoom;
 
-    graphics.moveTo(center.x,center.y);
-    graphics.arc(
-      center.x,
-      center.y,
-      screenRadius,
-      geometry.config.startAngle,
-      geometry.config.endAngle,
-    );
+  //   graphics.moveTo(center.x,center.y);
+  //   graphics.arc(
+  //     center.x,
+  //     center.y,
+  //     screenRadius,
+  //     geometry.config.startAngle,
+  //     geometry.config.endAngle,
+  //   );
 
-    graphics.fill();
-    graphics.stroke();
-    this.root.addChild(graphics);
-  }
+  //   graphics.fill();
+  //   graphics.stroke();
+  //   this.root.addChild(graphics);
+  // }
 
   private applyTransform(
     point:{x:number;y:number},
