@@ -140,7 +140,7 @@ export class PixiRendererSystem implements ISystem{
     point:{x:number;y:number},
     transform:Transform,
     camera:Camera2D,
-  ){
+  ):Transform{
     let x=point.x*transform.worldScale.x;
     let y=point.y*transform.worldScale.y;
 
@@ -157,6 +157,6 @@ export class PixiRendererSystem implements ISystem{
     const screenX=(x-camera.x)*camera.zoom+camera.width/2;
     const screenY=(camera.y-y)*camera.zoom+camera.height/2;
 
-    return {x:screenX,y:screenY};
+    return {x:screenX,y:screenY,z:0};
   }
 }

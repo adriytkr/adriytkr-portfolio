@@ -8,12 +8,14 @@ import {
   AnimationGroup,
   AnimationSystem,
   Hierarchy,
+  PolylineGeometry,
   Renderable,
   Transform,
   TransformSystem,
   create2DCamera,
   rotateAnimationTrack,
   shiftAnimationTrack,
+  RendererSystem,
 } from '@adriytkr/std';
 
 import {
@@ -28,9 +30,10 @@ import {
 
 import type { WorldObject } from '@adriytkr/math';
 
-import { PixiRendererSystem } from '@adriytkr/pixi-renderer-2d';
+import { PixiRendererAdapter } from '@adriytkr/pixi-renderer-2d';
 
 import * as PIXI from 'pixi.js';
+import { PixiRendererSystem } from '~~/packages/pixi-renderer-2d/src/PixiRendererSystem';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
@@ -40,9 +43,6 @@ let camera:{
   entity:Entity,
   camera2D:Camera2D,
 };
-
-let square:WorldObject;
-let vector:WorldObject;
 
 onMounted(async()=>{
   if(!canvasRef.value)return;
@@ -66,7 +66,8 @@ onMounted(async()=>{
     autoDensity:true,
   });
 
-  systemManager.add(new PixiRendererSystem(renderer));
+  const pixiAdapter=new PixiRendererAdapter(renderer);
+  systemManager.add(new RendererSystem(pixiAdapter));
 
   camera=create2DCamera(
     world,
@@ -80,69 +81,26 @@ onMounted(async()=>{
     },
   );
 
-  const axes=createStandardAxes(world,{});
-  const grid=createGrid(world,{});
-
-  const arc=createArc(
-    world,
-    {
-      position:{x:0,y:0,z:0},
-      radius:2,
-      startAngle:0,
-      endAngle:Math.PI/3,
-    },
-  );
-  
-  square=createSquare(
-    world,
-    {
-      position:{x:0.5,y:0.5,z:0},
-      sidelength:1,
-    },
-  );
-
-  vector=createVector(
-    world,
-    {
-      from:{x:0,y:0,z:0},
-      to:{x:2,y:1,z:0},
-    },
-    {
-      color:'blue',
-    },
-  );
-
-  const circle=createCircle(
-    world,
-    {
-      position:{x:0,y:0,z:0},
-      radius:7,
-    },
-    {
-      fill:'transparent',
-      stroke:'red',
-    },
-  );
-
-  const curve=createParametricFunction(
-    world,
-    {
-      position:{x:0,y:0,z:0},
-      samples:100,
-      x:t=>3*Math.sin(2*t+Math.PI/3),
-      y:t=>5*Math.sin(2*t),
-      tDomain:[-Math.PI,Math.PI],
-    }
-  );
-
-  world.addComponent(square.entity,new Hierarchy());
-  world.addComponent(vector.entity,new Hierarchy(square.entity));
+  const crazyLine=world.createEntity();
+  world.addComponent(crazyLine,new PolylineGeometry([
+    {x:1,y:1,z:0},
+    {x:1,y:0,z:0},
+    {x:2,y:1,z:0},
+  ]));
+  world.addComponent(crazyLine,new Transform());
+  world.addComponent(crazyLine,new Hierarchy());
 
   let lastTime=performance.now();
   function loop(time:number){
+    pixiAdapter.root.removeChildren();
+
     const delta=(time-lastTime)/1000;
     lastTime=time;
     systemManager.update(world,delta);
+
+    renderer.render({
+      container:pixiAdapter.root,
+    });
     requestAnimationFrame(loop);
   }
 
@@ -153,22 +111,6 @@ onMounted(async()=>{
   canvas.addEventListener('mouseup',handleMouseUp);
   canvas.addEventListener('mousemove',handleMouseMove);
 });
-
-let animationGroup=new AnimationGroup();
-function shift(){
-  world.addComponent(square.entity,animationGroup);
-  animationGroup.addTrack(shiftAnimationTrack(1,square.transform,{x:1,y:1,z:0}));
-}
-
-function rotate(){
-  world.addComponent(square.entity,animationGroup);
-  animationGroup.addTrack(rotateAnimationTrack(1,square.transform,Math.PI/3));
-}
-
-function shiftAndRotate(){
-  shift();
-  rotate();
-}
 
 let isDragging=false;
 let lastMouse={x:0,y:0};
@@ -213,9 +155,6 @@ onUnmounted(()=>{
 <template>
   <h1>Hello, World!</h1>
   <canvas ref="canvasRef"></canvas>
-  <button @click="shift">Shift</button>
-  <button @click="rotate">Rotate</button>
-  <button @click="shiftAndRotate">Shift and Rotate</button>
 </template>
 
 <style scoped>
