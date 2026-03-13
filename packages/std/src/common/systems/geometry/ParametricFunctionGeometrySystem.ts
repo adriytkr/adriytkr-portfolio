@@ -29,8 +29,6 @@ export class ParametricFunctionGeometrySystem implements ISystem{
         },
         transform,
       });
-
-      world.removeComponent(entity,DirtyTag);
     }
   }
 }

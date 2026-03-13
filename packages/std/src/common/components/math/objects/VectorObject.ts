@@ -1,10 +1,15 @@
 import { Component } from '@adriytkr/engine';
-import type { Point } from '../../../types';
+import type { Point } from '../../../../types';
+
+export interface VectorOptions{
+  to:Point;
+}
 
 export class VectorObject extends Component{
-  public constructor(
-    public to:Point,
-  ){
+  public to:Point;
+
+  public constructor(options:VectorOptions){
     super();
+    this.to=options.to;
   }
 }

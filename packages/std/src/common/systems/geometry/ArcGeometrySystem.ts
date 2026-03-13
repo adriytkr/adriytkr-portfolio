@@ -26,8 +26,6 @@ export class ArcGeometrySystem implements ISystem{
         },
         transform,
       });
-
-      world.removeComponent(entity,DirtyTag);
     }
   }
 }

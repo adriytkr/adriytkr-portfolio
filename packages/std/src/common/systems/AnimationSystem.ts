@@ -1,6 +1,6 @@
 import { World } from '@adriytkr/engine';
 import type { ISystem } from '@adriytkr/engine';
-import { AnimationGroup } from '../components';
+import { AnimationGroup, DirtyTag } from '../components';
 
 export class AnimationSystem implements ISystem{
   public update(world:World,delta:number):void{
@@ -13,6 +13,8 @@ export class AnimationSystem implements ISystem{
         const animation=animationGroup.tracks[i]!;
         animation.elapsed+=delta;
         const alpha=Math.min(animation.elapsed/animation.duration,1);
+
+        world.addComponent(entity,new DirtyTag());
 
         animation.onUpdate(alpha);
         if(alpha>=1)animationGroup.tracks.splice(i,1);

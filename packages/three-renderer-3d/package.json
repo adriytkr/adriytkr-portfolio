@@ -1,0 +1,13 @@
+{
+  "name":"@adriytkr/three-renderer-3d",
+  "version":"1.0.0",
+  "type":"module", 
+  "exports":{
+    ".":"./src/index.ts",
+    "./*":"./src/*.ts"
+  },
+  "dependencies":{
+    "@adriytkr/engine":"*",
+    "@adriytkr/std":"*"
+  }
+}

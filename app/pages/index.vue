@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { World,SystemManager } from '@adriytkr/engine';
 import type { Entity } from '@adriytkr/engine';
 
 import { Camera2D } from '@adriytkr/std/2d/index';
@@ -8,24 +7,10 @@ import {
   TransformSystem,
   create2DCamera,
   RendererSystem,
-  Transform,
-  Hierarchy,
-  Renderable,
   FunctionGeometrySystem,
-  FunctionObject,
-  ParametricFunctionObject,
-  ParametricFunctionGeometrySystem,
-  PolygonObject,
-  RegularPolygonObject,
-  PolygonSystem,
-  RegularPolygonSystem,
-  VectorGeometrySystem,
-  VectorObject,
-  GridGeometrySystem,
-  GridObject,
-  DirtyTag,
-  ArcObject,
-  ArcGeometrySystem,
+  AnimationSystem,
+  FunctionSceneObject,
+  Scene,
 } from '@adriytkr/std';
 
 import { PixiRendererAdapter } from '@adriytkr/pixi-renderer-2d';
@@ -36,12 +21,14 @@ import * as PIXI from 'pixi.js';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
-let world:World;
-let systemManager:SystemManager;
 let camera:{
   entity:Entity,
   camera2D:Camera2D,
 };
+let scene:Scene;
+
+let theFunction:FunctionSceneObject;
+let theFunction2:FunctionSceneObject;
 
 onMounted(async()=>{
   if(!canvasRef.value)return;
@@ -50,17 +37,11 @@ onMounted(async()=>{
   canvas.width=canvas.clientWidth;
   canvas.height=canvas.clientHeight;
 
-  world=new World();
-  systemManager=new SystemManager();
+  scene=new Scene();
 
-  systemManager.add(new TransformSystem());
-  systemManager.add(new FunctionGeometrySystem());
-  systemManager.add(new ParametricFunctionGeometrySystem());
-  systemManager.add(new PolygonSystem());
-  systemManager.add(new RegularPolygonSystem());
-  systemManager.add(new VectorGeometrySystem());
-  systemManager.add(new GridGeometrySystem());
-  systemManager.add(new ArcGeometrySystem());
+  scene.addSystem(new AnimationSystem());
+  scene.addSystem(new TransformSystem());
+  scene.addSystem(new FunctionGeometrySystem());
 
   const renderer=await PIXI.autoDetectRenderer({
     canvas:canvasRef.value,
@@ -73,10 +54,10 @@ onMounted(async()=>{
 
   const pixiAdapter=new PixiRendererAdapter(renderer);
   const commandBuffer=new CommandBuffer<PixiDrawCommand>();
-  systemManager.add(new RendererSystem<PixiDrawCommand>(pixiAdapter,commandBuffer));
+  scene.addSystem(new RendererSystem<PixiDrawCommand>(pixiAdapter,commandBuffer));
 
   camera=create2DCamera(
-    world,
+    scene.world,
     {
       position:{x:0,y:0,z:0},
       zoom:50,
@@ -87,68 +68,89 @@ onMounted(async()=>{
     },
   );
 
-  const func=world.createEntity();
-  world.addComponent(func,new Transform());
-  world.addComponent(func,new Hierarchy());
-  world.addComponent(func,new FunctionObject(
-    x=>x**2,
-    200,
-    [-3,3],
-  ));
-  world.addComponent(func,new Renderable());
-  world.addComponent(func,new DirtyTag());
+  // const para=scene.world.createEntity();
+  // scene.world.addComponent(para,new Transform());
+  // scene.world.addComponent(para,new Hierarchy());
+  // scene.world.addComponent(para,new ParametricFunctionObject({
+  //   x:t=>t+5,
+  //   y:t=>(t+5)**2,
+  //   tDomain:[-3,3],
+  //   samples:200,
+  // }));
+  // scene.world.addComponent(para,new Renderable());
+  // scene.world.addComponent(para,new DirtyTag());
 
-  const para=world.createEntity();
-  world.addComponent(para,new Transform());
-  world.addComponent(para,new Hierarchy());
-  world.addComponent(para,new ParametricFunctionObject(
-    t=>t+5,
-    t=>(t+5)**2,
-    [-3,3],
-    200,
-  ));
-  world.addComponent(para,new Renderable());
-  world.addComponent(para,new DirtyTag());
+  theFunction=new FunctionSceneObject({
+    fn:x=>x**2,
+    domain:[-3,10],
+    samples:200,
+  });
+  scene.add(theFunction);
 
-  const polygon=world.createEntity();
-  world.addComponent(polygon,new Transform());
-  world.addComponent(polygon,new Hierarchy());
-  world.addComponent(polygon,new PolygonObject([
-    {x:0,y:0,z:0},
-    {x:1,y:1,z:0},
-    {x:2,y:1,z:0},
-    {x:2,y:0,z:0},
-  ]));
-  world.addComponent(polygon,new Renderable());
-  world.addComponent(polygon,new DirtyTag());
+  theFunction2=new FunctionSceneObject({
+    fn:x=>2*x+3,
+    domain:[-3,10],
+    samples:200,
+  });
+  scene.add(theFunction2);
 
-  const pentagon=world.createEntity();
-  world.addComponent(pentagon,new Transform());
-  world.addComponent(pentagon,new Hierarchy());
-  world.addComponent(pentagon,new RegularPolygonObject(5,2));
-  world.addComponent(pentagon,new Renderable());
-  world.addComponent(pentagon,new DirtyTag());
+  // const polygon=world.createEntity();
+  // world.addComponent(polygon,new Transform());
+  // world.addComponent(polygon,new Hierarchy());
+  // world.addComponent(polygon,new PolygonObject({
+  //   vertices:[
+  //     {x:0,y:0,z:0},
+  //     {x:1,y:1,z:0},
+  //     {x:2,y:1,z:0},
+  //     {x:2,y:0,z:0},
+  //   ]
+  // }));
+  // world.addComponent(polygon,new Renderable());
+  // world.addComponent(polygon,new DirtyTag());
 
-  const vector=world.createEntity();
-  world.addComponent(vector,new Transform());
-  world.addComponent(vector,new Hierarchy());
-  world.addComponent(vector,new VectorObject({x:4,y:2,z:0}));
-  world.addComponent(vector,new Renderable());
-  world.addComponent(vector,new DirtyTag());
+  // const pentagon=world.createEntity();
+  // world.addComponent(pentagon,new Transform());
+  // world.addComponent(pentagon,new Hierarchy());
+  // world.addComponent(pentagon,new RegularPolygonObject({
+  //   sidelength:2,
+  //   sides:5,
+  // }));
+  // world.addComponent(pentagon,new Renderable());
+  // world.addComponent(pentagon,new DirtyTag());
 
-  const grid=world.createEntity();
-  world.addComponent(grid,new Transform());
-  world.addComponent(grid,new Hierarchy());
-  world.addComponent(grid,new GridObject(-3,3,-3,3,1,1));
-  world.addComponent(grid,new Renderable());
-  world.addComponent(grid,new DirtyTag());
+  // const vector=world.createEntity();
+  // world.addComponent(vector,new Transform());
+  // world.addComponent(vector,new Hierarchy());
+  // world.addComponent(vector,new VectorObject({
+  //   to:{x:4,y:2,z:0},
+  // }));
+  // world.addComponent(vector,new Renderable());
+  // world.addComponent(vector,new DirtyTag());
 
-  const arc=world.createEntity();
-  world.addComponent(arc,new Transform());
-  world.addComponent(arc,new Hierarchy());
-  world.addComponent(arc,new ArcObject(3,0,Math.PI/3));
-  world.addComponent(arc,new Renderable());
-  world.addComponent(arc,new DirtyTag());
+  // const grid=world.createEntity();
+  // world.addComponent(grid,new Transform());
+  // world.addComponent(grid,new Hierarchy());
+  // world.addComponent(grid,new GridObject({
+  //   xMin:-3,
+  //   xMax:3,
+  //   yMin:-3,
+  //   yMax:3,
+  //   xStep:1,
+  //   yStep:1,
+  // }));
+  // world.addComponent(grid,new Renderable());
+  // world.addComponent(grid,new DirtyTag());
+
+  // const arc=world.createEntity();
+  // world.addComponent(arc,new Transform());
+  // world.addComponent(arc,new Hierarchy());
+  // world.addComponent(arc,new ArcObject({
+  //   radius:3,
+  //   startAngle:0,
+  //   endAngle:Math.PI/3,
+  // }));
+  // world.addComponent(arc,new Renderable());
+  // world.addComponent(arc,new DirtyTag());
 
   let lastTime=performance.now();
   function loop(time:number){
@@ -156,7 +158,7 @@ onMounted(async()=>{
 
     const delta=(time-lastTime)/1000;
     lastTime=time;
-    systemManager.update(world,delta);
+    scene.update(delta);
 
     renderer.render({
       container:pixiAdapter.root,
@@ -174,6 +176,15 @@ onMounted(async()=>{
 
 let isDragging=false;
 let lastMouse={x:0,y:0};
+
+function update(){
+  theFunction.setDomain([-10,-5]);
+  console.log(theFunction.domain);
+}
+
+function clear(){
+
+}
 
 function handleMouseScroll(e:WheelEvent){
   e.preventDefault();
@@ -215,6 +226,7 @@ onUnmounted(()=>{
 <template>
   <h1>Hello, World!</h1>
   <canvas ref="canvasRef"></canvas>
+  <button @click="update">Update</button>
 </template>
 
 <style scoped>

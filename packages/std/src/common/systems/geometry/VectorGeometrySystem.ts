@@ -45,8 +45,6 @@ export class VectorGeometrySystem implements ISystem{
         },
         transform,
       });
-
-      world.removeComponent(entity,DirtyTag);
     }
   }
 }

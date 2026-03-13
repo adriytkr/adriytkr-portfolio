@@ -2,10 +2,11 @@ import { World } from '@adriytkr/engine';
 import type { Entity,ISystem } from '@adriytkr/engine';
 import { Hierarchy } from '../components/Hierarchy';
 import { Transform } from '../components/Transform';
+import { DirtyTag } from '../components';
 
 export class TransformSystem implements ISystem{
   public update(world:World,dt:number):void{
-    const entities=world.query(Transform,Hierarchy);
+    const entities=world.query(DirtyTag,Transform,Hierarchy);
 
     for(const entity of entities){
       this.ensureUpdated(world,entity);

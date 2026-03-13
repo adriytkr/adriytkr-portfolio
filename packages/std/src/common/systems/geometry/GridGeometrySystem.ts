@@ -52,8 +52,6 @@ export class GridGeometrySystem implements ISystem{
       }
 
       renderable.primitives.push(...primitives);
-
-      world.removeComponent(entity,DirtyTag);
     }
   }
 }

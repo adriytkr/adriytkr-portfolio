@@ -23,8 +23,6 @@ export class PolygonSystem implements ISystem{
         },
         transform,
       });
-
-      world.removeComponent(entity,DirtyTag);
     }
   }
 }

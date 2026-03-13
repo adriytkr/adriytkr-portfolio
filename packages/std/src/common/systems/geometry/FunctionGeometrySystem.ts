@@ -7,6 +7,7 @@ import type { PixiDrawCommand } from '@adriytkr/pixi-renderer-2d';
 export class FunctionGeometrySystem implements ISystem{
   public update(world:World,delta:number):void{
     for(const entity of world.query(DirtyTag,FunctionObject,Renderable,Transform)){
+      console.log(entity);
       const transform=world.getComponent(entity,Transform)!;
       const renderable=world.getComponent(entity,Renderable)! as Renderable<PixiDrawCommand>;
       const func=world.getComponent(entity,FunctionObject)!;
@@ -28,8 +29,6 @@ export class FunctionGeometrySystem implements ISystem{
         },
         transform,
       });
-
-      world.removeComponent(entity,DirtyTag);
     }
   }
 }
