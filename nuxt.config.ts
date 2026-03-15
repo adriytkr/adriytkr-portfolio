@@ -13,9 +13,6 @@ export default defineNuxtConfig({
     '@nuxt/content',
   ],
   alias:{
-    '@math':fileURLToPath(new URL('./app/shared/types/math',import.meta.url)),
-    '@math-objects':fileURLToPath(new URL('./app/shared/types/math/objects',import.meta.url)),
-    '@engines':fileURLToPath(new URL('./app/engines',import.meta.url)),
     '@constants':fileURLToPath(new URL('./app/shared/constants',import.meta.url)),
   },
   imports:{
