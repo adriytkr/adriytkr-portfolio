@@ -17,6 +17,11 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@adriytkr/core": ["packages/core/src/index.ts"],
+      "@adriytkr/core/*": ["packages/core/src/*.ts"],
+      "@adriytkr/math": ["packages/math/src/index.ts"],
+      "@adriytkr/math/*": ["packages/math/src/*.ts"],
+    }
   }
 }

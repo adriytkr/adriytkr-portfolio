@@ -1,0 +1,12 @@
+{
+  "name":"@adriytkr/math",
+  "version":"*",
+  "private":true,
+  "exports":{
+    ".":"./src/index.ts",
+    "./*":"./src/*.ts"
+  },
+  "dependencies":{
+    "@adriytkr/core":"*"
+  }
+}

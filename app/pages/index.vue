@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  Signal,
+  Derive,
+} from '@adriytkr/core';
+
+
+
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
 onMounted(()=>{

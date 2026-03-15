@@ -1,0 +1,9 @@
+{
+  "name":"@adriytkr/core",
+  "version":"*",
+  "private":true,
+  "exports":{
+    ".":"./src/index.ts",
+    "./*":"./src/*.ts"
+  }
+}

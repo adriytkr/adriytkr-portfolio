@@ -13,6 +13,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@adriytkr/core": "*",
+    "@adriytkr/math": "*",
     "@nuxt/content": "^3.12.0",
     "@nuxt/fonts": "^0.14.0",
     "@nuxtjs/i18n": "^10.2.3",
