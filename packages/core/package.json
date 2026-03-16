@@ -1,9 +1,12 @@
 {
-  "name":"@adriytkr/core",
-  "version":"*",
-  "private":true,
-  "exports":{
-    ".":"./src/index.ts",
-    "./*":"./src/*.ts"
+  "name": "@adriytkr/core",
+  "version": "*",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "gl-matrix": "^3.4.4"
   }
 }

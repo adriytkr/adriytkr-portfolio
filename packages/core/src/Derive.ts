@@ -1,8 +1,5 @@
 import { BaseSignal } from './BaseSignal';
-import { DEFAULT_DERIVE_OPTIONS } from './constants';
 import type { Signal } from './Signal';
-import type { DeriveOptions } from './types';
-import { flattenSignals } from './utils';
 
 export class Derive<T> extends BaseSignal<T>{
   private m_dirty=true;
@@ -12,11 +9,10 @@ export class Derive<T> extends BaseSignal<T>{
   public constructor(
     deps:(Signal<any>|Derive<any>)[],
     getter:()=>T,
-    options:DeriveOptions=DEFAULT_DERIVE_OPTIONS,
   ){
     super(getter());
     this.m_getter=getter;
-    this.m_deps=options.deep?flattenSignals(deps):deps;
+    this.m_deps=deps;
 
     const update=()=>{
       this.m_dirty=true;

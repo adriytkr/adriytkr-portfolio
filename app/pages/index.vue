@@ -1,41 +1,26 @@
 <script setup lang="ts">
-import {
-  Signal,
-  Derive,
-  Node,
-  Vector2,
-} from '@adriytkr/core';
+import { Node } from '@adriytkr/core';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
-const formatLocal=(node:Node):string=>
-  `(${node.localPosition.value.x.value},${node.localPosition.value.y.value})`;
-const formatWorld=(node:Node):string=>
-  `(${node.worldPosition.value.x.value},${node.worldPosition.value.y.value})`;
-
+const root=new Node();
 const parent=new Node();
 const child=new Node();
-
-console.log(formatLocal(parent),formatWorld(parent));
-console.log(formatLocal(child),formatWorld(child));
-console.log('---');
-
+root.add(parent);
 parent.add(child);
-parent.localPosition.value.x.value+=100;
-console.log(formatLocal(parent),formatWorld(parent));
-console.log(formatLocal(child),formatWorld(child));
-console.log('---');
 
-child.localPosition.value.x.value+=10;
-console.log(formatLocal(parent),formatWorld(parent));
-console.log(formatLocal(child),formatWorld(child));
-console.log('---');
+child.translate(1,1,0);
+child.position.x.value+=1;
+child.position.y.value+=1;
 
-parent.remove(child);
-parent.localPosition.value.x.value+=200;
-console.log(formatLocal(parent),formatWorld(parent));
-console.log(formatLocal(child),formatWorld(child));
-console.log('---');
+console.log(parent.worldPosition,child.worldPosition);
+
+// parent.position.x.value=100;
+// console.log(parent.worldPosition,child.worldPosition);
+
+// parent.remove(child);
+// parent.position.x.value+=300;
+// console.log(parent.worldPosition,child.worldPosition);
 
 onMounted(()=>{
   if(canvasRef.value===null)return;
