@@ -1,6 +1,9 @@
 import { Signal } from './Signal';
 import { mat4, vec3, quat, mat3 } from 'gl-matrix';
 
+import { Hierarchy } from './Hierarchy';
+import { Transform } from './Transform';
+
 export class Node{
   private m_parent:Node|null=null;
   private m_children:Node[]=[];
@@ -33,7 +36,13 @@ export class Node{
   private m_localMatrix=mat4.create();
   private m_worldMatrix=mat4.create();
 
+  private m_hierarchy:Hierarchy;
+  private m_transform:Transform;
+
   public constructor(){
+    this.m_hierarchy=new Hierarchy(this);
+    this.m_transform=new Transform(this);
+
     this.watchPosition();
     this.watchRotation();
     this.watchScale();
@@ -190,19 +199,110 @@ export class Node{
     child.markDirty();
   }
 
-  public detach():void{}
+  public detach():void{
+    if(this.m_parent===null)
+      throw Error('This node has no parent to detach from');
 
-  public reset():void{}
+    this.m_parent.remove(this);
+  }
 
-  public clone():void{}
+  public reset():void{
+    this.resetPosition();
+    this.resetRotation();
+    this.resetScale();
+  }
 
-  public translate(dx:number,dy:number,dz:number):void{}
+  public resetPosition(){
+    this.position.x.value=0;
+    this.position.y.value=0;
+    this.position.z.value=0;
+  }
 
-  public rotateX(rad:number):void{}
+  public resetRotation(){
+    this.rotation.x.value=0;
+    this.rotation.y.value=0;
+    this.rotation.z.value=0;
+  }
 
-  public rotateY(rad:number):void{}
+  public resetScale():void{
+    this.scale.x.value=1;
+    this.scale.y.value=1;
+    this.scale.z.value=1;
+  }
 
-  public rotateZ(rad:number):void{}
+  public clone(deep=true):Node{
+    const copy=new Node();
 
-  public scaleBy(sx:number,sy:number,sz:number):void{}
+    const wm=this.worldMatrix;
+    const pos=vec3.create();
+    const rot=quat.create();
+    const scl=vec3.create();
+    mat4.getTranslation(pos,wm);
+    mat4.getRotation(rot,wm);
+    mat4.getScaling(scl,wm);
+
+    copy.m_position=pos;
+    copy.m_rotation=vec3.fromValues(rot[0],rot[1],rot[2]);
+    copy.m_scale=scl;
+
+    copy.position.x.value=pos[0];
+    copy.position.y.value=pos[1];
+    copy.position.z.value=pos[2];
+
+    const euler=this.quatToEuler(rot);
+    copy.rotation.x.value=euler[0];
+    copy.rotation.y.value=euler[1];
+    copy.rotation.z.value=euler[2];
+
+    copy.scale.x.value=scl[0];
+    copy.scale.y.value=scl[1];
+    copy.scale.z.value=scl[2];
+
+    copy.markDirty();
+
+    if(deep){
+      for(const child of this.m_children){
+        const childCopy=child.clone(true);
+        copy.add(childCopy);
+      }
+    }
+
+    return copy;
+  }
+
+  private quatToEuler(q:quat):vec3{
+    const x=q[0];
+    const y=q[1];
+    const z=q[2];
+    const w=q[3];
+
+    const sinr_cosp=2*(w*x+y*z);
+    const cosr_cosp=1-2*(x**2+y**2);
+    const roll=Math.atan2(sinr_cosp,cosr_cosp);
+
+    const sinp=2*(w*y-z*x);
+    let pitch;
+    if(Math.abs(sinp)>=1)
+      pitch=Math.sign(sinp)*Math.PI/2;
+    else
+      pitch=Math.asin(sinp);
+
+    const siny_cosp=2*(w*z+x*y);
+    const cosy_cosp=1-2*(y*y+z*z);
+    const yaw=Math.atan2(siny_cosp,cosy_cosp);
+
+    return vec3.fromValues(roll,pitch,yaw);
+  }
+
+  public translate(dx:number=0,dy:number=0,dz:number=0):void{
+    this.position.x.value+=dx;
+    this.position.x.value+=dy;
+    this.position.x.value+=dz;
+  }
+
+  public scaleBy(sx:number,sy:number,sz:number):void{
+    this.position.x.value*=sx;
+    this.position.x.value*=sy;
+    this.position.x.value*=sz;
+  }
 }

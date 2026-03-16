@@ -1,5 +1,7 @@
-export * from './BaseSignal';
 export * from './Signal';
-export * from './Derive';
+export * from './watch';
+export * from './derive';
 
 export * from './Node';
+export * from './Transform';
+export * from './Hierarchy';

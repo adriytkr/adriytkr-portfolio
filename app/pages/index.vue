@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Node } from '@adriytkr/core';
+import { derive,Node,watch } from '@adriytkr/core';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
@@ -9,18 +9,14 @@ const child=new Node();
 root.add(parent);
 parent.add(child);
 
-child.translate(1,1,0);
-child.position.x.value+=1;
-child.position.y.value+=1;
+const et=new Node();
 
-console.log(parent.worldPosition,child.worldPosition);
+child.position.x.bind(
+  derive([et.position.x],()=>et.position.x.value*2),
+);
 
-// parent.position.x.value=100;
-// console.log(parent.worldPosition,child.worldPosition);
-
-// parent.remove(child);
-// parent.position.x.value+=300;
-// console.log(parent.worldPosition,child.worldPosition);
+et.position.x.value=30;
+console.log(child.position.x);
 
 onMounted(()=>{
   if(canvasRef.value===null)return;
