@@ -31,12 +31,11 @@ console.log(formatLocal(parent),formatWorld(parent));
 console.log(formatLocal(child),formatWorld(child));
 console.log('---');
 
-// child.detach();
 parent.remove(child);
 parent.localPosition.value.x.value+=200;
 console.log(formatLocal(parent),formatWorld(parent));
 console.log(formatLocal(child),formatWorld(child));
-// console.log('---');
+console.log('---');
 
 onMounted(()=>{
   if(canvasRef.value===null)return;

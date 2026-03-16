@@ -13,10 +13,10 @@ export class Node{
     this.localPosition=new Signal<Vector2>(new Vector2(0,0));
     this.worldPosition=new Derive(
       [
-        this.localPosition.value.x,
-        this.localPosition.value.y,
+        this.localPosition,
       ],
       ()=>this.localPosition.value,
+      {deep:true},
     );
   }
 
@@ -62,15 +62,14 @@ export class Node{
     if(this.parent){
       this.worldPosition=new Derive(
         [
-          this.localPosition.value.x,
-          this.localPosition.value.y,
-          this.parent.worldPosition.value.x,
-          this.parent.worldPosition.value.y,
+          this.localPosition,
+          this.parent.worldPosition,
         ],
         ()=>new Vector2(
           this.localPosition.value.x.value+this.parent!.worldPosition.value.x.value,
           this.localPosition.value.y.value+this.parent!.worldPosition.value.y.value,
-        )
+        ),
+        {deep:true},
       );
     }else{
       this.worldPosition=new Derive(
