@@ -4,17 +4,38 @@ import * as PIXI from 'pixi.js';
 import {
   Animator,
   Camera,
+
+  Arc,
+  Circle,
+  ParametricCurve,
+  ExplicitCurve,
+  FunctionCurve,
+  LinearFunction,
+  QuadraticFunction,
+  Point,
   Vector,
+  CartesianAxes,
+
+  MathClassic,
 } from '@adriytkr/math';
 
-import { PointView,Scene, VectorView } from '@adriytkr/renderer-pixi';
+import {
+  Scene,
+
+  ArcView,
+  CircleView,
+  CurveView,
+  PointView,
+  VectorView,
+  CartesianAxesView,
+} from '@adriytkr/renderer-pixi';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
 let scene:Scene;
 const animator=new Animator();
 
-const camera=new Camera({zoom:10});
+const camera=new Camera({zoom:100});
 
 onMounted(async()=>{
   if(canvasRef.value===null)return;
@@ -34,58 +55,112 @@ onMounted(async()=>{
   });
 
   scene=new Scene(app,camera);
+  scene.register(Arc,ArcView);
+  scene.register(Circle,CircleView);
+  scene.register(ParametricCurve,CurveView);
+  scene.register(Point,PointView);
   scene.register(Vector,VectorView);
+  scene.register(CartesianAxes,CartesianAxesView);
 
-  const vector=new Vector(
+  // const arc=new Arc(
+  //   {
+  //     radius:4,
+  //     startAngle:0,
+  //     endAngle:Math.PI,
+  //   },
+  //   MathClassic.ClosedStyle,
+  // );
+  // scene.add(arc);
+
+  // const circle=new Circle(
+  //   {
+  //     radius:4,
+  //   },
+  //   MathClassic.ClosedStyle,
+  // );
+  // circle.position.x$.value+=5;
+  // circle.position.y$.value+=10;
+  // scene.add(circle);
+
+  // const myFunction=new ExplicitCurve(
+  //   {
+  //     y:x=>x**2,
+  //     domain:[-3,3],
+  //     resolution:300,
+  //   },
+  //   MathClassic.PolylineStyle,
+  // );
+  // scene.add(myFunction);
+
+  // const myFunction2=new FunctionCurve(
+  //   {
+  //     x:t=>t**2,
+  //     y:t=>t**2,
+  //     z:t=>0,
+  //     tDomain:[-3,3],
+  //     resolution:300,
+  //   },
+  //   MathClassic.PolylineStyle,
+  // );
+  // scene.add(myFunction2);
+
+  // const linearFunction=new LinearFunction(
+  //   {
+  //     slope:-3,
+  //     yIntercept:3,
+  //     domain:[0,5],
+  //   },
+  //   MathClassic.PolylineStyle,
+  // );
+  // scene.add(linearFunction);
+
+  // const quadraticFunction=new QuadraticFunction(
+  //   {
+  //     a:3,
+  //     b:2,
+  //     c:5,
+  //     domain:[-3,3],
+  //     resolution:300,
+  //   },
+  //   MathClassic.PolylineStyle,
+  // );
+  // scene.add(quadraticFunction);
+
+  // const point=new Point;(
+  //   {
+  //     size:0.5,
+  //   },
+  //   MathClassic.ClosedStyle,
+  // );
+  // scene.add(point);
+
+  // const vector=new Vector(
+  //   {
+  //     to:{
+  //       x:2,
+  //       y:2,
+  //       z:0,
+  //     },
+  //   },
+  //   MathClassic.VectorStyle,
+  // );
+  // scene.add(vector);
+
+  const cartesianAxes=new CartesianAxes(
     {
-      to:{x:1,y:1,z:0},
+      domain:[-3,3],
+      range:[-3,3],
+      step:1,
     },
-    {
-      lineFill:'red',
-      lineStroke:'red',
-      lineStrokeWidth:1,
-
-      arrowFill:'red',
-      arrowStroke:'red',
-      arrowStrokeWidth:1,
-
-      opacity:1,
-    },
+    MathClassic.AxesStyle,
   );
-  vector.position.x$.value=0;
-  vector.position.y$.value=0;
-
-  scene.add(vector);
-
-
-
-
-
-
-
-
-  scene.stage.scale.set(camera.zoom$.value);
-  updateStagePosition();
-
-  camera.zoom$.subscribe(v=>{
-    scene.stage.scale.set(v);
-    updateStagePosition(); 
-  });
-
-  camera.position.x$.subscribe(updateStagePosition);
-  camera.position.y$.subscribe(updateStagePosition);
-
-  function updateStagePosition(){
-    const zoom=camera.zoom$.value;
-    scene.stage.x=(app.screen.width/2)-(camera.position.x$.value*zoom);
-    scene.stage.y=(app.screen.height/2)-(camera.position.y$.value*zoom);
-  }
+  scene.add(cartesianAxes);
 
   app.start();
   app.ticker.add((ticker)=>{
     const delta=ticker.elapsedMS;
 
-    // square.position.x$.value+=10*delta;
+    scene.requestFullRedraw();
     animator.update(delta);
     app.render();
   });
@@ -102,8 +177,7 @@ onUnmounted(()=>{
   canvasRef.value.removeEventListener('wheel',handleZoom);
 });
 
-function animate():void{
-}
+function animate():void{}
 
 function remove():void{}
 
@@ -131,7 +205,7 @@ function handleMouseMove(event:MouseEvent):void{
   lastY=event.clientY;
 
   camera.position.x$.value-=dx/camera.zoom$.value;
-  camera.position.y$.value-=dy/camera.zoom$.value;
+  camera.position.y$.value+=dy/camera.zoom$.value;
 }
 
 function handleZoom(event:WheelEvent):void{

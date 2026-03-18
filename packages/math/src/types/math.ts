@@ -1,3 +1,8 @@
+export type IVector2={
+  x:number;
+  y:number;
+};
+
 export type IVector3={
   x:number;
   y:number;

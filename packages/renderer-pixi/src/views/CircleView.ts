@@ -1,12 +1,12 @@
-import type { Point } from '@adriytkr/math';
+import type { Circle } from '@adriytkr/math';
 import { View } from '../View';
 
-export class PointView extends View<Point>{
-  public constructor(model:Point){
+export class CircleView extends View<Circle>{
+  public constructor(model:Circle){
     super(model);
   }
 
-  public init():void{}
+  public override init():void{}
 
   public override redraw():void{
     const g=this.graphics;
@@ -15,22 +15,18 @@ export class PointView extends View<Point>{
 
     g.clear();
 
-    g.x=m.position.x$.value;
-    g.y=m.position.y$.value;
+    g.setStrokeStyle({
+      color:m.style.stroke$.value,
+      width:m.style.strokeWidth$.value*zoom,
+    });
 
     g.setFillStyle({
       color:m.style.fill$.value,
     });
 
-    g.setStrokeStyle({
-      color:m.style.stroke$.value,
-      width:m.style.strokeWidth$.value,
-    });
-
-
     const center=this.project(m.position.x$.value,m.position.y$.value);
-    g.circle(center.x,center.y,m.size$.value*zoom);
-    
+    g.circle(center.x,center.y,m.radius$.value*zoom);
+
     g.stroke();
     g.fill();
   }

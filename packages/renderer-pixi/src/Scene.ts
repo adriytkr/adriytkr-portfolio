@@ -71,4 +71,8 @@ export class Scene{
       this.m_activePairs.delete(gameObject);
     }
   }
+
+  public requestFullRedraw():void{
+    this.m_activePairs.forEach(view=>view.redraw());
+  }
 }

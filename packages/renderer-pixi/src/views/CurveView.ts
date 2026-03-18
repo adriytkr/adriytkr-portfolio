@@ -1,21 +1,14 @@
 import type { ParametricCurve } from '@adriytkr/math';
 import { View } from '../View';
 
-export class CurveView extends View {
-  private m_model:ParametricCurve;
-
+export class CurveView extends View<ParametricCurve>{
   constructor(model:ParametricCurve){
-    super();
-    this.m_model=model;
+    super(model);
   }
 
-  public override init():void{
-    this.mark(this.m_model.position.x$.subscribe(x=>this.graphics.x=x));
-    this.mark(this.m_model.position.y$.subscribe(y=>this.graphics.y=y));
-  }
+  public override init():void{}
 
-  // renderer/CurveView.ts
-  public override redraw(): void {
+  public override redraw():void{
     const g=this.graphics;
     const m=this.m_model;
 
@@ -31,14 +24,16 @@ export class CurveView extends View {
 
     const step=(tEnd-tStart)/resolution;
 
-    const firstPoint=m.getPoint(tStart);
-    g.moveTo(firstPoint.x,-firstPoint.y);
+    const firstMathPoint=m.getPoint(tStart);
+    const firstScreenPoint=this.project(firstMathPoint.x,firstMathPoint.y);
+    g.moveTo(firstScreenPoint.x,firstScreenPoint.y);
 
     for(let i=1;i<=resolution;i++){
       const t=tStart+(step*i);
-      const point=m.getPoint(t);
+      const mathPoint=m.getPoint(t);
       
-      g.lineTo(point.x,-point.y);
+      const screenPoint=this.project(mathPoint.x,mathPoint.y);
+      g.lineTo(screenPoint.x,screenPoint.y);
     }
 
     g.stroke();

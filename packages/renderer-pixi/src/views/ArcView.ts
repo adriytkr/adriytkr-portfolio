@@ -1,55 +1,53 @@
 import type { Arc } from '@adriytkr/math';
 import { View } from '../View';
 
-export class ArcView extends View{
-  private m_model:Arc;
-
+export class ArcView extends View<Arc>{
   public constructor(model:Arc){
-    super();
-    this.m_model=model;
+    super(model);
   }
 
-  public override init():void{
-    this.mark(this.m_model.position.x$.subscribe(x=>this.graphics.x=x));
-    this.mark(this.m_model.position.y$.subscribe(y=>this.graphics.y=y));
-  }
+  public override init():void{}
 
   public override redraw():void{
     const g=this.graphics;
     const m=this.m_model;
+    const zoom=this.context.camera.zoom$.value;
 
     g.clear();
 
-    g.x=m.position.x$.value;
-    g.y=m.position.y$.value;
-
     g.setStrokeStyle({
       color:m.style.stroke$.value,
-      width:m.style.strokeWidth$.value,
+      width:m.style.strokeWidth$.value*zoom,
     });
 
     g.setFillStyle({
       color:m.style.fill$.value,
     });
 
-    g.moveTo(0,0);
+    const startAngle=-m.startAngle$.value;
+    const endAngle=-m.endAngle$.value;
+    const isCCW=!m.clockwise$.value;
+
+    const center=this.project(m.position.x$.value,m.position.y$.value);
+    g.moveTo(center.x,center.y);
     g.arc(
-      0,
-      0,
-      m.radius$.value,
-      m.startAngle$.value,
-      m.endAngle$.value*(m.clockwise$.value?1:-1),
-      !m.clockwise$.value,
+      center.x,
+      center.y,
+      m.radius$.value*zoom,
+      startAngle,
+      endAngle,
+      isCCW,
     );
+    g.closePath();
     g.fill();
 
     g.arc(
-      0,
-      0,
-      m.radius$.value,
-      m.startAngle$.value,
-      m.endAngle$.value*(m.clockwise$.value?1:-1),
-      !m.clockwise$.value,
+      center.x,
+      center.y,
+      m.radius$.value*zoom,
+      startAngle,
+      endAngle,
+      isCCW
     );
     g.stroke();
   }

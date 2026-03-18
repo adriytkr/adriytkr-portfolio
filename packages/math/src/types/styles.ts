@@ -22,3 +22,8 @@ export interface VectorStyleOptions{
 
   opacity:number;
 }
+
+export interface AxesStyleOptions{
+  color:string;
+  opacity:number;
+}
