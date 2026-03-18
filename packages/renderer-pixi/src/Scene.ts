@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js';
 
-import type { Constructor } from './types';
+import type { AbstractConstructor, ConcreteConstructor, Constructor } from './types';
 import { View } from './View';
 import { GameObject } from '@adriytkr/math';
 
 export class Scene{
   private m_app:PIXI.Application;
-  private m_registry=new Map<Constructor<GameObject>,Constructor<View>>();
+  private m_registry=new Map<Constructor<GameObject>,ConcreteConstructor<View>>();
   private m_activePairs=new Map<GameObject,View>(); 
 
   public constructor(app:PIXI.Application){
@@ -19,12 +19,12 @@ export class Scene{
 
   public register<G extends GameObject,V extends View>(
     gameClass:Constructor<G>,
-    viewClass:Constructor<V>,
+    viewClass:ConcreteConstructor<V>,
   ):void{
     this.m_registry.set(gameClass,viewClass);
   }
 
-  private getViewConstructor(gameClass:any):Constructor<View>|null{
+  private getViewConstructor(gameClass:any):ConcreteConstructor<View>|null{
     if(this.m_registry.has(gameClass))
       return this.m_registry.get(gameClass)!;
 

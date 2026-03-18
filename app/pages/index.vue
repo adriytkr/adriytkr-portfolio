@@ -4,11 +4,14 @@ import * as PIXI from 'pixi.js';
 import {
   Animator,
   Camera,
-  Arc,
-  Circle,
+  ParametricCurve,
+  FunctionCurve,
+  ExplicitCurve,
+  LinearFunction,
+  Parabola,
 } from '@adriytkr/math';
 
-import { ArcView,Scene } from '@adriytkr/renderer-pixi';
+import { CurveView,Scene } from '@adriytkr/renderer-pixi';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
@@ -30,10 +33,80 @@ onMounted(async()=>{
     width:canvasRef.value.width,
     height:canvasRef.value.height,
     autoStart:false,
+    resolution:window.devicePixelRatio||1,
+    autoDensity:true,
   });
 
   scene=new Scene(app);
-  scene.register(Arc,ArcView);
+  scene.register(ParametricCurve,CurveView);
+
+
+
+
+
+  const fn=new FunctionCurve(
+    {
+      x:t=>t,
+      y:t=>t**2,
+      z:t=>0,
+      tDomain:[-3,3],
+      resolution:100,
+    },
+    {
+      stroke:'red',
+      strokeWidth:0.1,
+      opacity:1,
+    },
+  );
+
+  const fn2=new ExplicitCurve(
+    {
+      y:x=>Math.sin(x),
+      domain:[-Math.PI*2,Math.PI*2],
+      resolution:500,
+    },
+    {
+      stroke:'red',
+      strokeWidth:0.1,
+      opacity:1,
+    },
+  );
+
+  const fn3=new LinearFunction(
+    {
+      slope:3,
+      yIntercept:0,
+      domain:[-3,3],
+    },
+    {
+      stroke:'red',
+      strokeWidth:0.1,
+      opacity:1,
+    },
+  );
+
+  const fn4=new Parabola(
+    {
+      a:3,
+      b:0,
+      c:0,
+      domain:[-3,3],
+      resolution:200,
+    },
+    {
+      stroke:'red',
+      strokeWidth:0.1,
+      opacity:1,
+    },
+  );
+
+  // scene.add(fn);
+  // scene.add(fn2);
+  // scene.add(fn3);
+  scene.add(fn4);
+
+
+
 
   scene.stage.scale.set(camera.zoom$.value);
   updateStagePosition();
