@@ -4,14 +4,10 @@ import * as PIXI from 'pixi.js';
 import {
   Animator,
   Camera,
-  ParametricCurve,
-  FunctionCurve,
-  ExplicitCurve,
-  LinearFunction,
-  Parabola,
+  Vector,
 } from '@adriytkr/math';
 
-import { CurveView,Scene } from '@adriytkr/renderer-pixi';
+import { PointView,Scene, VectorView } from '@adriytkr/renderer-pixi';
 
 const canvasRef=ref<HTMLCanvasElement|null>(null);
 
@@ -37,73 +33,33 @@ onMounted(async()=>{
     autoDensity:true,
   });
 
-  scene=new Scene(app);
-  scene.register(ParametricCurve,CurveView);
+  scene=new Scene(app,camera);
+  scene.register(Vector,VectorView);
 
-
-
-
-
-  const fn=new FunctionCurve(
+  const vector=new Vector(
     {
-      x:t=>t,
-      y:t=>t**2,
-      z:t=>0,
-      tDomain:[-3,3],
-      resolution:100,
+      to:{x:1,y:1,z:0},
     },
     {
-      stroke:'red',
-      strokeWidth:0.1,
+      lineFill:'red',
+      lineStroke:'red',
+      lineStrokeWidth:1,
+
+      arrowFill:'red',
+      arrowStroke:'red',
+      arrowStrokeWidth:1,
+
       opacity:1,
     },
   );
+  vector.position.x$.value=0;
+  vector.position.y$.value=0;
 
-  const fn2=new ExplicitCurve(
-    {
-      y:x=>Math.sin(x),
-      domain:[-Math.PI*2,Math.PI*2],
-      resolution:500,
-    },
-    {
-      stroke:'red',
-      strokeWidth:0.1,
-      opacity:1,
-    },
-  );
+  scene.add(vector);
 
-  const fn3=new LinearFunction(
-    {
-      slope:3,
-      yIntercept:0,
-      domain:[-3,3],
-    },
-    {
-      stroke:'red',
-      strokeWidth:0.1,
-      opacity:1,
-    },
-  );
 
-  const fn4=new Parabola(
-    {
-      a:3,
-      b:0,
-      c:0,
-      domain:[-3,3],
-      resolution:200,
-    },
-    {
-      stroke:'red',
-      strokeWidth:0.1,
-      opacity:1,
-    },
-  );
 
-  // scene.add(fn);
-  // scene.add(fn2);
-  // scene.add(fn3);
-  scene.add(fn4);
+
 
 
 

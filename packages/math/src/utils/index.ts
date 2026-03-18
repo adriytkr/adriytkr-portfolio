@@ -3,5 +3,4 @@ export * from './Vector3';
 
 export * from './animations';
 
-export * from './styles/ClosedStyle';
-export * from './styles/PolylineStyle';
+export * from './styles/';

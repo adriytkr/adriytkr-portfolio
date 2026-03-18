@@ -1,16 +1,18 @@
 import * as PIXI from 'pixi.js';
 
 import type { AbstractConstructor, ConcreteConstructor, Constructor } from './types';
-import { View } from './View';
-import { GameObject } from '@adriytkr/math';
+import { View, type WorldContext } from './View';
+import { Camera, GameObject } from '@adriytkr/math';
 
 export class Scene{
   private m_app:PIXI.Application;
   private m_registry=new Map<Constructor<GameObject>,ConcreteConstructor<View>>();
   private m_activePairs=new Map<GameObject,View>(); 
+  private m_activeCamera:Camera;
 
-  public constructor(app:PIXI.Application){
+  public constructor(app:PIXI.Application,camera:Camera){
     this.m_app=app;
+    this.m_activeCamera=camera;
   }
 
   public get stage():PIXI.Container{
@@ -47,8 +49,16 @@ export class Scene{
       throw Error(`No View registered for ${gameObject.constructor.name} or its parent`);
 
     const view=new ViewClass(gameObject);
+
+    const context:WorldContext={
+      app:this.m_app,
+      camera:this.m_activeCamera,
+    };
+    view.setContext(context);
+
     view.init();
     view.redraw();
+
     this.m_activePairs.set(gameObject,view);
     this.m_app.stage.addChild(view.graphics);
   }

@@ -10,3 +10,15 @@ export interface PolylineStyleOptions{
   strokeWidth:number;
   opacity:number;
 }
+
+export interface VectorStyleOptions{
+  arrowStroke:string;
+  arrowStrokeWidth:number;
+  arrowFill:string;
+
+  lineStroke:string;
+  lineStrokeWidth:number;
+  lineFill:string;
+
+  opacity:number;
+}

@@ -1,44 +1,38 @@
+import type { Point } from '@adriytkr/math';
 import { View } from '../View';
-import { IVector3 } from '@adriytkr/math';
 
 export class PointView extends View{
-  private m_model:IVector3;
-  private unsubscribers:(()=>void)[]=[];
+  private m_model:Point;
 
-  public constructor(model:IVector3){
+  public constructor(model:Point){
     super();
     this.m_model=model;
   }
 
-  public init():void{
-    this.unsubscribers.push(this.m_model.style.fill$.subscribe((c)=>this.graphics.tint=c));
-    this.unsubscribers.push(this.m_model.position.x$.subscribe((newX)=>this.graphics.x=newX));
-    this.unsubscribers.push(this.m_model.position.y$.subscribe((newY)=>this.graphics.y=newY));
-  }
+  public init():void{}
 
-  public redraw():void{
-    this.graphics.clear();
-    this.graphics.setFillStyle({
-      color:this.m_model.style.fill$.value,
+  public override redraw():void{
+    const g=this.graphics;
+    const m=this.m_model;
+    const zoom=1;
+
+    g.clear();
+
+    g.x=m.position.x$.value;
+    g.y=m.position.y$.value;
+
+    g.setFillStyle({
+      color:m.style.fill$.value,
     });
 
-    this.graphics.setStrokeStyle({
-      color:this.m_model.style.stroke$.value,
-      width:this.m_model.style.strokeWidth$.value,
+    g.setStrokeStyle({
+      color:m.style.stroke$.value,
+      width:m.style.strokeWidth$.value,
     });
 
-    this.graphics.circle(
-      0,
-      0,
-      2,
-    );
-    this.graphics.fill();
-  }
-
-  public destroy():void{
-    this.unsubscribers.forEach(unsub=>unsub());
-    this.unsubscribers.length=0;
-    this.graphics.destroy({children:true,texture:true});
+    g.circle(0,0,m.size$.value);
+    
+    g.stroke();
+    g.fill();
   }
 }
-
