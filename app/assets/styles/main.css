@@ -10,7 +10,8 @@
   html[data-theme="dark"]{
     --app-bg-color:rgb(26 26 26);
     --app-text-color:rgb(255 255 255);
-    --color-primary:rgb(255 255 255);
+    --color-primary:rgb(255 0 0);
+    /* --color-primary:rgb(255 255 255); */
     color-scheme: dark;
   }
 }

@@ -9,7 +9,7 @@ defineProps<{
 <template>
   <NuxtLinkLocale :to="to">
     <img
-      class="mb-4 w-full object-cover"
+      class="mb-4 w-full object-cover aspect-video"
       :src="img"
       :alt="alt"
     />

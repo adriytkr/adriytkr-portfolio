@@ -18,7 +18,7 @@ const localesItem:LocaleItem[]=[
 
 <template>
   <header class="header p-4">
-    <nav class="flex justify-between items-center">
+    <nav class="w-full max-w-5xl mx-auto flex justify-between items-center">
       <ul class="flex gap-4">
         <li
           v-for="navLink in navLinks"
