@@ -10,9 +10,9 @@ export const locales:LocaleObject<CustomLocale>[]=[
     files: fetchLocaleFiles('en'),
   },
   {
-    code: 'pt-br',
+    code: 'pt-BR',
     name: 'Português',
-    files: fetchLocaleFiles('pt-br'),
+    files: fetchLocaleFiles('pt-BR'),
   },
   {
     code: 'de-DE',

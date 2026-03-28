@@ -11,7 +11,7 @@ const navLinks:NavLink[]=[
 
 const localesItem:LocaleItem[]=[
   {code:'en',name:'English'},
-  {code:'pt-br',name:'Português'},
+  {code:'pt-BR',name:'Português'},
   {code:'de-DE',name:'Deutsch'},
 ];
 </script>
