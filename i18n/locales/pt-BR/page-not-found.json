@@ -1,0 +1,7 @@
+{
+  "pageNotFound":{
+    "title":"Página não encontrada",
+    "description":"A página que você está procurando não existe.",
+    "goBack":"Leve-me de volta"
+  }
+}

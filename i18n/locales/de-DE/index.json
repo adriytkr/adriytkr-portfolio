@@ -1,3 +1,5 @@
 {
-  "welcome": "Bem-vindo ao meu blog!"
+  "aboutPage":{
+    "welcome": "Welcome to my blog!"
+  }
 }

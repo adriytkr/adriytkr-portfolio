@@ -4,7 +4,7 @@ const currentYear=new Date().getFullYear();
 
 <template>
   <footer class="text-center p-4 flex justify-between">
-    <p>&copy; {{currentYear}} My Blog. All rights reserved.</p>
+    <p>&copy; {{currentYear}}</p>
     <ul class="flex gap-x-4">
       <li>
         <BaseFooterLink href="https://github.com/adriytkr/">

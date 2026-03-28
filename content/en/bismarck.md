@@ -1,6 +1,6 @@
 ---
-title: English
-description: en
+title: Bismarck
+description: Bismarck is a project...
 ---
 
 Bismarck is a project...

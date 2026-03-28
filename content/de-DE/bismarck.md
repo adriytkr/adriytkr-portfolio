@@ -1,6 +1,6 @@
 ---
-title: Deutschland
-description: de-DE
+title: Bismarck
+description: Bismarck ist eine Projekt...
 ---
 
-Bismarck ist einen Projekt...
+Bismarck ist eine Projekt...

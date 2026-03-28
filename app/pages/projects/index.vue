@@ -1,33 +1,34 @@
 <script setup lang="ts">
-import placeholderImage from '~/assets/images/placeholder.png';
+import { PLACEHOLDER_IMAGE_PATH } from '~/constants/projects';
+
+const {t,locale}=useI18n();
+
+const {data:projects}=await useAsyncData(
+  ``,
+  async()=>{
+    const normalizedCollectionName=normalizeCollectionName(locale.value);
+    const projects=await queryCollection(normalizedCollectionName).all();
+
+    return projects;
+  },
+  {
+    watch:[locale],
+  },
+);
 </script>
 
 <template>
-  <h1 class="text-5xl mb-4">Projects</h1>
-  <p class="mb-8">These are my projects. They cover a wide area of topics and technologies.</p>
+  <h1 class="text-5xl mb-4">{{t('projectsPage.title')}}</h1>
+  <p class="mb-8">{{ t('projectsPage.description') }}</p>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <BaseCard :img="placeholderImage" :to="`/projects/bismarck`">
-      <template #title>Bismarck</template>
+    <BaseCard
+      v-for="project in projects"
+      :img="project.thumbnail??PLACEHOLDER_IMAGE_PATH"
+      :to="`/projects/${project.stem.split('/').pop()}`"
+    >
+      <template #title>{{project.title}}</template>
       <template #description>
-        <p>
-          Bismarck is a project about...
-        </p>
-      </template>
-    </BaseCard>
-    <BaseCard :img="placeholderImage" :to="`/projects/ml`">
-      <template #title>Machine Learning</template>
-      <template #description>
-        <p>
-          Machine Learning is a project about...
-        </p>
-      </template>
-    </BaseCard>
-    <BaseCard :img="placeholderImage" :to="`/projects/programming-language`">
-      <template #title>Programming Language</template>
-      <template #description>
-        <p>
-          This is a programming language I'm building
-        </p>
+        <p>{{project.description}}</p>
       </template>
     </BaseCard>
   </div>

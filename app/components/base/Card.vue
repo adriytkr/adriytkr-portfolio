@@ -7,9 +7,9 @@ defineProps<{
 </script>
 
 <template>
-  <NuxtLink :to="to">
+  <NuxtLinkLocale :to="to">
     <img
-      class="mb-4"
+      class="mb-4 w-full object-cover"
       :src="img"
       :alt="alt"
     />
@@ -17,5 +17,5 @@ defineProps<{
       <slot name="title"></slot>
     </h2>
     <slot name="description"></slot>
-  </NuxtLink>
+  </NuxtLinkLocale>
 </template>

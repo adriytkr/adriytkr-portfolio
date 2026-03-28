@@ -2,9 +2,9 @@
 import type { Collections } from '@nuxt/content';
 
 const route=useRoute();
-const {locale}=useI18n();
+const {t,locale}=useI18n();
 
-const {data:project}=await useAsyncData(
+const {data:project,status}=await useAsyncData(
   `project-`,
   async()=>{
     const normalizedCollectionName=`projects_${locale.value.replace('-','_')}` as keyof Collections;
@@ -23,6 +23,13 @@ const {data:project}=await useAsyncData(
   },
 );
 
+if(status.value!=='pending'&&project.value===null)
+  throw showError({
+    status:404,
+    statusText:t('error.title'),
+    fatal:true,
+  });
+
 useSeoMeta({
   title:project.value?.title,
   description:project.value?.description,
@@ -31,7 +38,4 @@ useSeoMeta({
 
 <template>
   <ContentRenderer v-if="project" :value="project"/>
-  <p v-else>
-    Not found
-  </p>
 </template>
