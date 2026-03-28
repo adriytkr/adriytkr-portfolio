@@ -1,6 +1,7 @@
 {
   "nav":{
-    "about":"About",
-    "articles":"Articles"
+    "about": "About",
+    "projects": "Projects",
+    "recommendations": "Recommendations"
   }
 }

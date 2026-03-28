@@ -1,78 +1,11 @@
-*{
-  padding:0;
-  margin:0;
-  box-sizing:border-box;
+@import "tailwindcss";
+
+@theme{
+  --color-primary:rgb(255 0 0);
 }
 
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  background-color:rgb(var(--background-color));
-  color:rgb(var(--text-color));
-  transition:
-    background-color var(--theme-transition-duration),
-    color var(--theme-transition-duration);
-}
-
-body,
-input,
-button,
-table td,
-table th,
-a{
-  font-family:'Inter',sans-serif;
-  font-size:16px;
-}
-
-button{
-  cursor:pointer;
-}
-
-a{
-  font-size:inherit;
-  text-decoration:none;
-  color:rgb(var(--text-color));
-  transition:color var(--theme-transition-duration);
-}
-
-ul,
-ol{
-  list-style:none;
-}
-
-h1,
-h2,
-h3{
-  font-weight:700;
-}
-h1{
-  margin-bottom:48px;
-  font-size:38px;
-}
-h2{
-  margin-bottom:28px;
-  font-size:24px;
-}
-h3{
-  margin-bottom:20px;
-  font-size:20px;
-}
-p{
-  margin-bottom:20px;
-  font-size:16px;
-  text-indent:32px;
-  line-height:1.7;
-}
-
-section{
-  margin:32px 0;
-  scroll-margin-top:24px;
-}
-hr{
-  width:100%;
-  height:1px;
-  background-color:#d4d4d4;
-  border:none;
+@layer base {
+  html[data-theme="dark"]{
+    --color-primary:rgb(0 0 0);
+  }
 }

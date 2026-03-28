@@ -1,7 +1,0 @@
-{
-  "articles":{
-    "readingTimeMin":"{minutes} min read",
-    "readingTimeHour":"{hours} hour read",
-    "readingTimeMixed":"{hours}h{minutes}m read"
-  }
-}

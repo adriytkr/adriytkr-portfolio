@@ -1,45 +1,21 @@
-import { getLocaleFiles } from './shared/utils/locale';
-import { fileURLToPath } from 'node:url';
+import tailwindcss from '@tailwindcss/vite';
+
+import {i18nConfig} from './app/config/i18n';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: [
-    '@nuxtjs/i18n',
-    '@pinia/nuxt',
-    '@vueuse/nuxt',
-    '@nuxt/fonts',
-    '@nuxt/content',
-  ],
-  alias:{
-    '@constants':fileURLToPath(new URL('./app/shared/constants',import.meta.url)),
-  },
-  imports:{
-    dirs:[
-      '~/shared/types/**/*',
-      '~/shared/utils',
+  css:['~/assets/styles/main.css'],
+  vite:{
+    plugins:[
+      tailwindcss(),
     ],
   },
-  css:[
-    '~/assets/styles/variables.css',
-    '~/assets/styles/theme.css',
-    '~/assets/styles/main.css',
-  ],
-  i18n:{
-    defaultLocale:'en',
-    locales:[
-      {
-        code:'en',
-        name:'English',
-        files:getLocaleFiles('en'),
-      },
-      {
-        code:'pt',
-        name:'Portuguese',
-        files:getLocaleFiles('pt'),
-      },
-    ],
-    vueI18n:'./i18n.config.ts',
+  modules:['@nuxt/content', '@nuxtjs/i18n', '@nuxtjs/color-mode'],
+  i18n:i18nConfig,
+  colorMode:{
+    fallback:'light',
+    dataValue:'theme',
   },
-});
+})
