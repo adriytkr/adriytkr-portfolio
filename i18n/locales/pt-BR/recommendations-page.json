@@ -1,6 +1,7 @@
 {
   "recommendationsPage":{
     "title":"Recomendações",
-    "description":"Aqui estão recomendações de livros que lí e cursos que assisti."
+    "description":"Aqui estão recomendações de livros que lí e cursos que assisti.",
+    "search":"Pesquisar"
   }
 }

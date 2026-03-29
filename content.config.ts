@@ -23,7 +23,7 @@ export const recommendationSchema=z.object({
   description:z.string(),
   thumbnail:z.string().optional(),
   author:z.string(),
-  categories:z.array(z.string()),
+  categories:z.array(z.string()).default([]),
   status:z.enum(status).default('pending'),
 });
 

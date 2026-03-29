@@ -1,6 +1,7 @@
 {
   "recommendationsPage":{
     "title":"Recommendations",
-    "description":"Here are books I read and courses I watched."
+    "description":"Here are books I read and courses I watched.",
+    "search":"Finden"
   }
 }

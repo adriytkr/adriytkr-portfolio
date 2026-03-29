@@ -1,6 +1,8 @@
 {
   "categories":{
     "literature":"Literatura",
-    "dystopian":"Distopia"
+    "dystopian":"Distopia",
+    "math":"Matemática",
+    "linear-algebra":"Algebra Linear"
   }
 }
