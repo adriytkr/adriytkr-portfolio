@@ -21,6 +21,7 @@ const status:RecommendationStatus=['reviewed','pending'];
 export const recommendationSchema=z.object({
   title:z.string(),
   description:z.string(),
+  longDescription:z.string(),
   thumbnail:z.string().optional(),
   author:z.string(),
   categories:z.array(z.string()).default([]),
