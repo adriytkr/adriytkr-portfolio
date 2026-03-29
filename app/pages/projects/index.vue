@@ -28,7 +28,7 @@ fetch();
     :frequency="tagFrequencyMap"
     v-model="selectedTags"
   />
-  <p v-if="filteredProjects.length>0" class="mb-4">
+  <p v-if="filteredProjects.length>0&&(searchQuery.trim().length>0||selectedTags.length>0)" class="mb-4">
     {{ $t(
         'projectsPage.search.results',
         {
@@ -39,7 +39,7 @@ fetch();
       )
     }}
   </p>
-  <div class="flex flex-1 flex-col items-center justify-center" v-else>
+  <div class="flex flex-1 flex-col items-center justify-center" v-if="filteredProjects.length===0">
     <p>{{ $t('projectsPage.search.emptyState') }}</p>
     <button @click="reset">
       {{$t('projectsPage.search.clearSearch')}}

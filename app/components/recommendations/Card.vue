@@ -36,7 +36,7 @@ defineProps<{
           ? 'bg-green-500/30 text-green-500'
           : 'bg-zinc-800/70 text-zinc-300'"
       >
-        {{ $t(`status.${status}`) }}
+        {{ $t(`status.${status}Float`) }}
       </span>
     </div>
     <div class="flex flex-col flex-1">

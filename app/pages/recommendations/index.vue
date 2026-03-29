@@ -34,7 +34,7 @@ fetch();
     v-model="selectedStatus"
     :count="statusCounts"
   />
-  <p v-if="filteredRecommendations.length>0" class="mb-4">
+  <p v-if="filteredRecommendations.length>0&&(searchQuery.trim().length>0||selectedCategories.length>0)" class="mb-4">
     {{ $t(
         'recommendationsPage.search.results',
         {
@@ -45,7 +45,7 @@ fetch();
       )
     }}
   </p>
-  <div class="flex flex-1 flex-col items-center justify-center" v-else>
+  <div class="flex flex-1 flex-col items-center justify-center" v-if="filteredRecommendations.length===0">
     <p>{{ $t('recommendationsPage.search.emptyState') }}</p>
     <button @click="reset">
       {{$t('recommendationsPage.search.clearSearch')}}

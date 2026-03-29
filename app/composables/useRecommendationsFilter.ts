@@ -32,7 +32,7 @@ export function useRecommendationsFilter(){
     const query=searchQuery.value.toLowerCase();
 
     return recommendations.value.filter(recommendation=>
-      isRecommendationElegible(recommendation,query,selectedCategories.value),
+      isRecommendationElegible(recommendation,query,selectedCategories.value,selectedStatus.value),
     );
   });
 

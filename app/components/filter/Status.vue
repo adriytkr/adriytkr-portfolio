@@ -20,7 +20,7 @@ defineProps<{
         modelValue === status ? 'text-black border-b border-black' : 'text-zinc-400 hover:text-zinc-600'
       ]"
     >
-      {{ status }} <span class="ml-1 opacity-50">[{{ count[status] }}]</span>
+      {{ $t(`status.${status}`) }} <span class="ml-1 opacity-50">[{{ count[status] }}]</span>
     </button>
   </div>
 </template>

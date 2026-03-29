@@ -1,9 +1,11 @@
 import type { Recommendation } from '~/types/content';
+import type { RecommendationStatusFilter } from '~/types/recommendations';
 
 export function isRecommendationElegible(
   recommendation:Recommendation,
   query:string,
   categories:string[],
+  status:RecommendationStatusFilter,
 ):boolean{
   const matchesQuery=
     recommendation.title?.toLowerCase().includes(query)|| 
@@ -17,5 +19,7 @@ export function isRecommendationElegible(
       selectedCategory=>recommendation.categories?.includes(selectedCategory)
     );
 
-  return matchesQuery&&matchesCategory;
+  const matchesStatus=status==='all'||recommendation.status===status;
+
+  return matchesQuery&&matchesCategory&&matchesStatus;
 }
