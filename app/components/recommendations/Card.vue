@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RecommendationStatus } from '~/types/i18n';
+import type { RecommendationStatus } from '~/types/recommendations';
 
 defineProps<{
   to:string;

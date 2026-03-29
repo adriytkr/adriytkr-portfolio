@@ -1,7 +1,7 @@
 import { defineContentConfig } from '@nuxt/content'
 import { defineCollection,z } from '@nuxt/content';
 
-import type {CustomLocale,RecommendationStatus} from './app/types/i18n';
+import type {CustomLocale,RecommendationStatus} from './app/types/recommendations';
 import {normalizeCollectionName} from './app/utils/content';
 
 export const projectSchema=z.object({

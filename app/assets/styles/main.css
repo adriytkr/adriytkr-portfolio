@@ -1,27 +1,25 @@
 @import "tailwindcss";
 
 @theme{
-  --app-bg-color:rgb(255 255 255);
-  --app-text-color:rgb(0 0 0);
+  --color-bg:rgb(255 255 255);
+  --color-text:rgb(0 0 0);
   --color-primary:rgb(255 0 0);
 }
 
 @layer base {
   html[data-theme="dark"]{
-    --app-bg-color:rgb(26 26 26);
-    --app-text-color:rgb(255 255 255);
+    --color-bg:rgb(26 26 26);
+    --color-text:rgb(255 255 255);
     --color-primary:rgb(255 0 0);
-    /* --color-primary:rgb(255 255 255); */
     color-scheme: dark;
   }
-}
 
-body{
-  background-color:var(--app-bg-color);
-}
+  body{
+    @apply bg-bg text-text
+  }
 
-body,
-input,
-button{
-  color:var(--app-text-color);
+  button,
+  input{
+    @apply text-text;
+  }
 }

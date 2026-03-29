@@ -1,28 +1,21 @@
 <script setup lang="ts">
-import type { Collections } from '@nuxt/content';
-
-import { PLACEHOLDER_IMAGE_PATH } from '~/constants/projects';
-import { normalizeCollectionName } from '~/utils/content';
+import ViewModeButton from '~/components/recommendations/ViewModeButton.vue';
+import { RecommentationService } from '~/services/RecommendationService';
+import type { Recommendation } from '~/types/content';
+import type { ViewMode } from '~/types/recommendations';
+import { isRecommendationElegible } from '~/utils/recommendations';
 
 const {locale}=useI18n();
 
-type Recommendation=Collections['recommendations_en'];
-
 const {data:recommendations}=await useAsyncData(
   `recommendations-${locale.value}`,
-  async()=>{
-    const normalizedCollectionName=normalizeCollectionName('recommendations',locale.value);
-    const recommendations:Recommendation[]=await queryCollection(normalizedCollectionName).all();
-
-    return recommendations;
-  },
-  {
-    watch:[locale],
-  },
+  async()=>await RecommentationService.getAll(locale.value),
+  {watch:[locale]},
 );
 
 const searchQuery=ref<string>('');
 const selectedCategories=ref<string[]>([]);
+const selectedViewMode=ref<ViewMode>('grid');
 
 const filteredRecommendations=computed<Recommendation[]>(()=>{
   if(recommendations.value===undefined)return[];
@@ -30,17 +23,7 @@ const filteredRecommendations=computed<Recommendation[]>(()=>{
   const query=searchQuery.value.toLowerCase();
 
   return recommendations.value.filter(recommendation=>
-    (
-      recommendation.title?.toLowerCase().includes(query)|| 
-      recommendation.author?.toLowerCase().includes(query)||
-      recommendation.description?.toLowerCase().includes(query)
-    )&&
-    (
-      selectedCategories.value.length===0||
-      selectedCategories.value.some(
-        selectedCategory=>recommendation.categories?.includes(selectedCategory)
-      )
-    )
+    isRecommendationElegible(recommendation,query,selectedCategories.value),
   );
 });
 
@@ -57,54 +40,42 @@ const categoryFrequencyMap=computed(()=>{
 });
 
 const categories=computed(()=>Object.keys(categoryFrequencyMap.value));
-
-function selectCategory(category:string){
-  if(!selectedCategories.value.includes(category)){
-    selectedCategories.value.push(category);
-    return;
-  }
-
-  const index=selectedCategories.value.findIndex(selectedCategory=>selectedCategory===category);
-  selectedCategories.value.splice(index,1);
-}
 </script>
 
 <template>
   <h1 class="text-5xl mb-4">{{$t('recommendationsPage.title')}}</h1>
   <p class="mb-8">{{ $t('recommendationsPage.description') }}</p>
-  <div class="mb-4">
+  <div class="flex justify-between item-center">
     <RecommendationsSearch v-model="searchQuery"/>
+    <div class="flex items-center gap-x-4">
+      <ViewModeButton
+        label="Grid"
+        :is-selected="selectedViewMode==='grid'"
+        @click="selectedViewMode='grid'"
+      >
+        <!-- Grid Icon -->
+        <svg class="inline-block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor">
+          <path d="M120-120v-720h720v720H120Zm640-80v-240H520v240h240Zm0-560H520v240h240v-240Zm-560 0v240h240v-240H200Zm0 560h240v-240H200v240Z"/>
+        </svg>
+      </ViewModeButton>
+      <ViewModeButton
+        label="List"
+        :is-selected="selectedViewMode==='list'"
+        @click="selectedViewMode='list'"
+      >
+        <!-- List Icon -->
+        <svg class="inline-block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor">
+          <path d="M280-600v-80h560v80H280Zm0 160v-80h560v80H280Zm0 160v-80h560v80H280ZM160-600q-17 0-28.5-11.5T120-640q0-17 11.5-28.5T160-680q17 0 28.5 11.5T200-640q0 17-11.5 28.5T160-600Zm0 160q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440Zm0 160q-17 0-28.5-11.5T120-320q0-17 11.5-28.5T160-360q17 0 28.5 11.5T200-320q0 17-11.5 28.5T160-280Z"/>
+        </svg>
+      </ViewModeButton>
+      </div>
   </div>
-  <div class="mb-12 flex flex-wrap gap-4">
-    <button
-      v-for="category in categories"
-      :key="category"
-      @click="selectCategory(category)"
-      class="px-2 py-1 border font-bold uppercase text-sm cursor-pointer"
-      :class="[
-        selectedCategories.includes(category)
-          ?'bg-primary border-primary'
-          :'bg-zinc-100 border-zinc-200'
-      ]"
-    >
-      {{ $te(`categories.${category}`) ? $t(`categories.${category}`) : category }}
-      ({{ categoryFrequencyMap[category] }})
-    </button>
-  </div>
-  <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-    <RecommendationsCard
-      v-for="recommendation in filteredRecommendations"
-      :key="recommendation.id"
-      :img="recommendation.thumbnail??PLACEHOLDER_IMAGE_PATH"
-      :to="`/recommendations/${recommendation.stem.split('/').pop()}`"
-      :categories="recommendation.categories??[]"
-      :status="recommendation.status??'pending'"
-    >
-      <template #title>{{recommendation.title}}</template>
-      <template #author>{{recommendation.author}}</template>
-      <template #description>
-        <p>{{recommendation.description}}</p>
-      </template>
-    </RecommendationsCard>
-  </div>
+  <RecommendationsFilterByCategory
+    :categories="categories"
+    :frequency="categoryFrequencyMap"
+    v-model="selectedCategories"
+  />
+  <RecommendationsList
+    :recommendations="filteredRecommendations"
+  />
 </template>
