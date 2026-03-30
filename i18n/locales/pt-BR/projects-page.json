@@ -1,10 +1,10 @@
 {
   "projectsPage":{
-    "title":"Projects",
-    "description":"These are my projects. They cover a wide area of topics and technologies.",
+    "title":"Projetos",
+    "description":"Coleção de implementações técnicas e projetos explorando uma variedade de tópicos, incluindo computação gráfica, aprendizado de máquina, física, matemática e compiladores.",
     "search":{
-      "placeholder":"Pesquisar projetos...",
-      "emptyState":"Eu não criei esse projeto ainda",
+      "placeholder":"Pesquisar projetos por título, descrição...",
+      "emptyState":"Nenhum projeto encontrado",
       "clearSearch":"Limpar pesquisa",
       "results":"Nenhum resultado encontrado para {query}|1 resultado para {query}|{count} resultados para {query}"
     }

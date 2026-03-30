@@ -7,7 +7,7 @@ const selectedViewMode=defineModel<ViewMode>({default:'grid'});
 <template>
   <div class="flex items-center gap-x-4 my-4">
     <FilterViewModeButton
-      label="Grid"
+      :label="$t('filter.grid')"
       :is-selected="selectedViewMode==='grid'"
       @click="selectedViewMode='grid'"
     >
@@ -17,7 +17,7 @@ const selectedViewMode=defineModel<ViewMode>({default:'grid'});
       </svg>
     </FilterViewModeButton>
     <FilterViewModeButton
-      label="List"
+      :label="$t('filter.list')"
       :is-selected="selectedViewMode==='list'"
       @click="selectedViewMode='list'"
     >

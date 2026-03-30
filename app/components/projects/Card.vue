@@ -21,7 +21,7 @@ defineProps<{
     ]"
   >
     <img
-      class=" object-cover aspect-video"
+      class=" object-cover aspect-video rounded-sm"
       :class="[
         viewMode==='grid'
           ?'mb-4 w-full'
@@ -42,7 +42,7 @@ defineProps<{
           v-for="tag in tags"
           :key="tag"
         >
-          {{ $te(`categories.${tag}`) ? $t(`categories.${tag}`) : tag }}
+          {{ $te(`badges.${tag}`) ? $t(`badges.${tag}`) : tag }}
         </BaseBadge>
       </div>
     </div>

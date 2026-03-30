@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ISearchAPI } from '~/types/search';
+
 const {
   fetch,
   searchQuery,
@@ -10,6 +12,14 @@ const {
   reset,
 }=useProjectsFilter();
 
+const searchRef=ref<ISearchAPI|null>(null);
+
+async function clearSearch(){
+  reset();
+  await nextTick();
+  searchRef.value?.focusInput();
+}
+
 fetch();
 </script>
 
@@ -18,33 +28,32 @@ fetch();
   <p class="mb-8">{{ $t('projectsPage.description') }}</p>
   <div class="flex flex-col md:flex-row md:justify-between md:items-center">
     <FilterSearch
+      ref="searchRef"
       v-model="searchQuery"
       :placeholder="$t('projectsPage.search.placeholder')"
     />
     <FilterSelectViewMode v-model="selectedViewMode"/>
   </div>
-  <FilterCategory
-    :categories="tags"
+  <FilterBadge
+    :badges="tags"
     :frequency="tagFrequencyMap"
     v-model="selectedTags"
   />
-  <p v-if="filteredProjects.length>0&&(searchQuery.trim().length>0||selectedTags.length>0)" class="mb-4">
-    {{ $t(
-        'projectsPage.search.results',
-        {
-          count:filteredProjects.length,
-          query:searchQuery,
-        },
-        filteredProjects.length,
-      )
-    }}
-  </p>
-  <div class="flex flex-1 flex-col items-center justify-center" v-if="filteredProjects.length===0">
-    <p>{{ $t('projectsPage.search.emptyState') }}</p>
-    <button @click="reset">
-      {{$t('projectsPage.search.clearSearch')}}
-    </button>
-  </div>
+  <FilterFeedback
+    v-if="
+      filteredProjects.length>0&&
+      (searchQuery.trim().length>0||
+      selectedTags.length>0)
+    "
+    :match-count="filteredProjects.length"
+    :query="searchQuery"
+  />
+  <FilterEmptyState
+    v-if="filteredProjects.length===0"
+    :message="$t('projectsPage.search.emptyState')"
+    :action-label="$t('projectsPage.search.clearSearch')"
+    @reset="clearSearch"
+  />
   <ProjectsList
     :projects="filteredProjects??[]"
     :view-mode="selectedViewMode"

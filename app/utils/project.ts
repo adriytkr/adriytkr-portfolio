@@ -7,7 +7,8 @@ export function isProjectElegible(
 ):boolean{
   const matchesQuery=
     recommendation.title?.toLowerCase().includes(query)|| 
-    recommendation.description?.toLowerCase().includes(query);
+    recommendation.description?.toLowerCase().includes(query)||
+    recommendation.longDescription?.toLowerCase().includes(query);
 
   const matchesTag=
     tags.length===0||

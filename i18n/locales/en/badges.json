@@ -1,0 +1,14 @@
+{
+  "badges":{
+    "literature":"Literature",
+    "dystopian":"Dystopian",
+    "math":"Math",
+    "physics":"Physics",
+    "linear-algebra":"Linear Algebra",
+    "compilers":"Compilers",
+    "computer-science":"Computer Science",
+    "artificial-intelligence":"Artificial Intelligence",
+    "machine-learning":"Machine Learning",
+    "python":"Python"
+  }
+}

@@ -39,7 +39,6 @@ export function useProjectsFilter(){
     const frequencyMap:Record<string,number>={};
 
     projects.value?.forEach(project=>{
-      console.log(project.tags);
       project.tags?.forEach((tag:string)=>{
         frequencyMap[tag]=(frequencyMap[tag]||0)+1;
       });
