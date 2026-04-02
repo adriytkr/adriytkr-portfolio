@@ -28,7 +28,7 @@ const navLinks:NavLink[]=[
           <NuxtLinkLocale
             :to="navLink.to"
             class="relative transition-colors duration-200 text-muted hover:text-body before:content-[''] before:absolute before:-bottom-2 before:right-1/2 before:w-1 before:h-1 before:rounded-full before:opacity-0 before:bg-body before:transition-opacity before:duration-200 hover:before:opacity-100"
-            exact-active-class="is-active text-primary font-bold before:opacity-100 before:!bg-primary"
+            exact-active-class="is-active !text-primary font-bold before:opacity-100 before:!bg-primary"
           >
             {{ $t(navLink.label)}}
           </NuxtLinkLocale>

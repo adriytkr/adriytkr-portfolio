@@ -12,7 +12,7 @@ function toggleTheme():void{
 <template>
   <button
     @click="toggleTheme"
-    class="p-2 text-muted hover:text-body transition-colors duration-200"
+    class="p-2 text-muted transition-colors duration-200 hover:text-body"
   >
     <!-- Moon Icon -->
     <svg v-if="colorMode.value==='dark'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor">
