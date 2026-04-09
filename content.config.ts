@@ -1,19 +1,9 @@
-import { defineContentConfig } from '@nuxt/content'
+import { defineContentConfig } from '@nuxt/content';
 
-import type {CustomLocale} from './app/types/i18n';
-
-import {normalizeCollectionName} from './app/utils/content';
-
-import {createProjectCollection} from './app/config/content/project';
-
-const makeCollection=(locale:CustomLocale)=>({
-  [normalizeCollectionName('projects',locale)]:createProjectCollection(locale),
-});
+import {projectsCollection} from './content/config/projects';
 
 export default defineContentConfig({
-  collections: {
-    ...makeCollection('en'),
-    ...makeCollection('pt-br'),
-    ...makeCollection('de-de'),
+  collections:{
+    projects:projectsCollection,
   }
 })

@@ -1,39 +1,33 @@
-import type { ProjectSchema } from '~/types/content';
+import type { ProjectSchema } from '~/types/projects';
 import type { ViewMode,SortingMode } from '~/types/filter';
 
 import {
-  isProjectElegible,
+  matchProject,
   sortProjectsWithStrategy,
 } from '~/utils/project';
+import type { CustomLocale } from '~~/i18n/config/types';
 
-export function useProjectsFilter(){
+export function useProjectsFilter(locale:CustomLocale){
   const searchQuery=ref<string>('');
   const selectedViewMode=ref<ViewMode>('grid');
 
-  const {t,locale}=useI18n();
   const projects=ref<ProjectSchema[]>([]);
 
   async function fetch(){
-    const {data}=await useProjects(locale);
+    const result=await queryCollection('projects')
+      .where('path','LIKE',`/docs/projects/${locale}/%`)
+      .all() as ProjectSchema[];
 
-    if(data.value===undefined)
-      throw Error('Could not fetch projects');
-
-    projects.value=data.value;
+    projects.value=result;
   }
 
   const selectedSortingMode=ref<SortingMode>('sorted');
 
   const filteredProjects=computed<ProjectSchema[]>(()=>{
     const result=projects.value.filter(project=>{
-      const translatedTags=project.tags.map(tag=>
-        t(`tags.${tag}`).toLowerCase()
-      );
-
-      return isProjectElegible(
+      return matchProject(
         project,
         searchQuery.value,
-        translatedTags,
       );
     });
 

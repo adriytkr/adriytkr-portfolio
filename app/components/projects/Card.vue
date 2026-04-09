@@ -5,12 +5,7 @@ defineProps<{
   to:string;
   thumbnail:string;
   alt?:string;
-  tags:string[];
   viewMode:ViewMode;
-}>();
-
-defineEmits<{
-  (e:'select-tag',tag:string):void;
 }>();
 </script>
 
@@ -56,15 +51,6 @@ defineEmits<{
           <slot name="title"></slot>
         </h2>
         <slot name="description"></slot>
-      </div>
-      <div class="flex flex-wrap gap-x-2">
-        <ProjectsCardTag
-          v-for="tag in tags"
-          :key="tag"
-          @click.stop.prevent="$emit('select-tag',tag)"
-        >
-          {{ $t(`tags.${tag}`) }}
-        </ProjectsCardTag>
       </div>
     </div>
   </NuxtLinkLocale>

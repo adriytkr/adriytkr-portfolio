@@ -1,22 +1,21 @@
-import type { ProjectSchema } from '~/types/content';
+import type { ProjectSchema } from '~/types/projects';
 import type { SortingMode } from '~/types/filter';
 
-export function isProjectElegible(
-  recommendation:ProjectSchema,
+export function matchProject(
+  project:ProjectSchema,
   query:string,
-  tags:string[],
 ):boolean{
   const normalizedQuery=query.toLowerCase();
 
   const matchesQuery=
-    recommendation.title?.toLowerCase().includes(normalizedQuery)||
-    recommendation.description?.toLowerCase().includes(normalizedQuery);
+    project.title
+      ?.toLowerCase()
+      .includes(normalizedQuery)||
+    project.description
+      ?.toLowerCase()
+      .includes(normalizedQuery);
 
-  const matchesTags=tags.some(tag=>
-    tag.includes(normalizedQuery)
-  );
-
-  return matchesQuery||matchesTags;
+  return matchesQuery;
 }
 
 export function sortProjectsWithStrategy(

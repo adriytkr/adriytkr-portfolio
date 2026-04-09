@@ -1,8 +1,0 @@
-Landing Page
-
-Dark Theme
-Mobile Support
-
-Improve Filter
-Add pagination
-Add query in the URL

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ISearchAPI } from '~/types/filter';
 
+const {t,locale}=useI18n();
+
 const {
   fetch,
   searchQuery,
@@ -9,11 +11,9 @@ const {
   filteredProjects,
   matchesFound,
   reset,
-}=useProjectsFilter();
+}=useProjectsFilter(locale.value);
 
 const searchRef=ref<ISearchAPI|null>(null);
-
-const {t}=useI18n();
 const emptyStateMessage=computed<string>(
   ()=>t(
     'projectsPage.search.results',
@@ -27,14 +27,6 @@ const emptyStateMessage=computed<string>(
 
 async function clearSearch(){
   reset();
-  await nextTick();
-  searchRef.value?.focusInput();
-}
-
-async function updateSearchQueryBasedOnTag(tag:string){
-  const translatedTag=t(`tags.${tag}`);
-  searchQuery.value=translatedTag||tag;
-
   await nextTick();
   searchRef.value?.focusInput();
 }
@@ -80,7 +72,6 @@ fetch();
     <ProjectsList
       :projects="filteredProjects"
       :view-mode="selectedViewMode"
-      @select-tag="updateSearchQueryBasedOnTag"
     />
   </div>
 </template>

@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { PLACEHOLDER_IMAGE_PATH } from '~/constants/config';
 
-import type { ProjectSchema } from '~/types/content';
+import type { ProjectSchema } from '~/types/projects';
 import type { ViewMode } from '~/types/filter';
 
 defineProps<{
   projects:ProjectSchema[];
   viewMode:ViewMode;
-}>();
-
-defineEmits<{
-  (e:'select-tag',tag:string):void;
 }>();
 </script>
 
@@ -25,10 +21,8 @@ defineEmits<{
     <ProjectsCard
       v-for="project in projects"
       :thumbnail="project.thumbnail??PLACEHOLDER_IMAGE_PATH"
-      :to="`/projects/${project.stem.split('/').pop()}`"
-      :tags="project.tags"
+      :to="`/projects/${project.slug}`"
       :view-mode="viewMode"
-      @select-tag="$emit('select-tag',$event)"
     >
       <template #title>{{project.title}}</template>
       <template #description>
