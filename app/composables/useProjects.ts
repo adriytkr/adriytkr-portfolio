@@ -1,5 +1,5 @@
 import { ProjectService } from '~/services/ProjectService';
-import type { CustomLocale } from '~/types/i18n';
+import type { CustomLocale } from '~~/i18n/config/types';
 
 export async function useProjects(locale:Ref<CustomLocale>){
   const {data}=await useAsyncData(

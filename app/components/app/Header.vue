@@ -10,10 +10,6 @@ const navLinks:NavLink[]=[
     label:'nav.projects',
     to:'/projects',
   },
-  {
-    label:'nav.recommendations',
-    to:'/recommendations',
-  },
 ]
 </script>
 

@@ -1,9 +1,0 @@
-{
-  "status":{
-    "reviewedFloat":"Review Available",
-    "pendingFloat":"Review pending",
-    "all":"All",
-    "reviewed":"Reviewed",
-    "pending":"Pending"
-  }
-}

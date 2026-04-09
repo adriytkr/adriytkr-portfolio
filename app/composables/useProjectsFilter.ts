@@ -10,7 +10,6 @@ export function useProjectsFilter(){
   const searchQuery=ref<string>('');
   const selectedViewMode=ref<ViewMode>('grid');
 
-
   const {t,locale}=useI18n();
   const projects=ref<ProjectSchema[]>([]);
 

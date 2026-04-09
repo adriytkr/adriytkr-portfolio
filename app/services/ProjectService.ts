@@ -1,4 +1,4 @@
-import type { CustomLocale } from '~/types/i18n';
+import type { CustomLocale } from '~~/i18n/config/types';
 import type { ProjectSchema } from '~/types/content';
 import { normalizeCollectionName } from '~/utils/content';
 

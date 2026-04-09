@@ -1,7 +1,7 @@
 import type { NuxtI18nOptions, LocaleObject } from '@nuxtjs/i18n';
 
-import type {CustomLocale} from '../types/i18n';
-import {fetchLocaleFiles} from '../utils/i18n';
+import type {CustomLocale} from './types';
+import {fetchLocaleFiles} from './utils';
 
 export const locales:LocaleObject<CustomLocale>[]=[
   {

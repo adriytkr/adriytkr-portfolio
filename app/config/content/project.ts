@@ -1,6 +1,6 @@
 import { defineCollection,z } from '@nuxt/content';
 
-import type {CustomLocale} from '../../types/i18n';
+import type {CustomLocale} from '../../../i18n/config/types';
 
 export const projectSchema=z.object({
   title:z.string(),

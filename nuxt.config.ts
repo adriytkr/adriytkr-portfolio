@@ -1,6 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 
-import {i18nConfig} from './app/config/i18n';
+import {i18nConfig} from './i18n/config';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -12,7 +12,11 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
-  modules:['@nuxt/content', '@nuxtjs/i18n', '@nuxtjs/color-mode'],
+  modules:[
+    '@nuxt/content',
+    '@nuxtjs/i18n',
+    '@nuxtjs/color-mode',
+  ],
   i18n:i18nConfig,
   colorMode:{
     fallback:'light',

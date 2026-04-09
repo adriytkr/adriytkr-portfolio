@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import type {CustomLocale} from '~/types/i18n';
+import type {CustomLocale} from './types';
 
 export function fetchLocaleFiles(locale:CustomLocale):string[]{
   const localeDir=path.resolve(process.cwd(),'i18n/locales',locale);
